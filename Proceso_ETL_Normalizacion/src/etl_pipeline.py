@@ -20,27 +20,23 @@ class InclusiónETL:
             df['ID'] = df['ID'].astype(str).str.split('.').str[0].str.zfill(5)
         return df
 
-    def ejecutar_pipeline_en_vivo(self) -> pd.DataFrame:
+    def ejecutar_pipeline_en_vivo(self):
         try:
             req = urllib.request.Request(self.url_excel, headers=self.headers)
             with urllib.request.urlopen(req) as response:
                 data_bytes = response.read()
             
             excel_file = io.BytesIO(data_bytes)
-            
-            # Cargamos el lector de Excel para inspeccionar los nombres reales de las pestañas
             xl = pd.ExcelFile(excel_file)
             nombres_reales = xl.sheet_names
             
-            # Buscamos las pestañas limpiando los espacios en blanco invisibles automáticamente
             hoja_entrevistas = next((sheet for sheet in nombres_reales if sheet.strip() == "Entrevistas"), None)
-            hoja_checklist = next((sheet for sheet in nombres_reales if sheet.strip() == "Checklist de puesto"), None)
+            hoja_checklist = next((sheet for sheet in nombres_reales if sheet.strip() in ["Checklist de puesto", "Ckecklist de puesto"]), None)
             
             if not hoja_entrevistas or not hoja_checklist:
-                st.error(f"[ETL ERROR] No se encontraron las pestañas esperadas de forma exacta. Pestañas reales en tu Google Sheets: {nombres_reales}")
+                st.error(f"[ETL ERROR] No se encontraron las pestañas. Pestañas reales: {nombres_reales}")
                 raise ValueError("Estructura de pestañas inválida.")
             
-            # Leemos usando el nombre exacto con el que Google Sheets lo exportó
             df_e = pd.read_excel(excel_file, sheet_name=hoja_entrevistas)
             df_c = pd.read_excel(excel_file, sheet_name=hoja_checklist)
 
@@ -51,7 +47,6 @@ class InclusiónETL:
             st.error(f"[ETL CRITICAL ERROR] Fallo en lectura de datos: {str(e)}")
             raise e
 
-        # Normalización y procesamiento de datos
         df_e = self.limpiar_data(df_e)
         df_c = self.limpiar_data(df_c)
 
@@ -72,4 +67,4 @@ class InclusiónETL:
         if 'Fecha de evaluación' in df_final.columns:
             df_final['Fecha de evaluación'] = pd.to_datetime(df_final['Fecha de evaluación'], errors='coerce').dt.date
 
-        return df_final
+        return df_final, df_e, df_c
