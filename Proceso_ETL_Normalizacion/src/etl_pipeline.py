@@ -6,31 +6,15 @@ import streamlit as st
 
 class InclusiónETL:
     def __init__(self):
-        # ID verificado del documento editable compartido
+        # ID verificado de tu documento de Google Sheets
         self.spreadsheet_id = "12PoHZr0BMJux4IxW7A3z7d0NdeLsXUkl5AmUO2xLEok"
         
-        # URLs de exportación directa utilizando los GIDs reales de datos
-        self.url_entrevistas = f"https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}/export?format=csv&gid=0"
-        self.url_checklist = f"https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}/export?format=csv&gid=111429532"
+        # URL para exportar todo el libro completo en formato Excel (.xlsx)
+        self.url_excel = f"https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}/export?format=xlsx"
         
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
-
-    def descargar_csv(self, url: str, nombre_hoja: str) -> pd.DataFrame:
-        try:
-            req = urllib.request.Request(url, headers=self.headers)
-            with urllib.request.urlopen(req) as response:
-                data_bytes = response.read()
-                df = pd.read_csv(io.StringIO(data_bytes.decode('utf-8')))
-                return df
-        except urllib.error.HTTPError as e:
-            cuerpo_error = e.read().decode('utf-8', errors='ignore') if hasattr(e, 'read') else "Sin cuerpo"
-            st.error(f"[ETL ERROR] Fallo en {nombre_hoja} (Código: {e.code}). Verifica que el acceso general esté en 'Cualquier persona con el enlace'.")
-            raise e
-        except Exception as e:
-            st.error(f"[ETL ERROR] Fallo inesperado en {nombre_hoja}: {str(e)}")
-            raise e
 
     def limpiar_data(self, df: pd.DataFrame) -> pd.DataFrame:
         df.columns = [str(col).strip() for col in df.columns]
@@ -41,9 +25,25 @@ class InclusiónETL:
         return df
 
     def ejecutar_pipeline_en_vivo(self) -> pd.DataFrame:
-        # Descarga de los conjuntos de datos independientes
-        df_e = self.descargar_csv(self.url_entrevistas, "Entrevistas (gid=0)")
-        df_c = self.descargar_csv(self.url_checklist, "Checklist (gid=111429532)")
+        try:
+            # 1. Descargamos el archivo Excel completo en un stream de bytes
+            req = urllib.request.Request(self.url_excel, headers=self.headers)
+            with urllib.request.urlopen(req) as response:
+                data_bytes = response.read()
+            
+            # 2. Cargamos el archivo en memoria usando un buffer intermedio
+            excel_file = io.BytesIO(data_bytes)
+            
+            # 3. Leemos cada pestaña utilizando su nombre literal exacto de tu Google Sheets
+            df_e = pd.read_excel(excel_file, sheet_name="Entrevistas")
+            df_c = pd.read_excel(excel_file, sheet_name="Checklist de puesto")
+
+        except urllib.error.HTTPError as e:
+            st.error(f"[ETL CRITICAL ERROR] Error HTTP {e.code}: No se pudo descargar el libro Excel de Google.")
+            raise e
+        except Exception as e:
+            st.error(f"[ETL CRITICAL ERROR] Asegúrate de que los nombres de las pestañas sean exactamente 'Entrevistas' y 'Checklist de puesto'. Error: {str(e)}")
+            raise e
 
         # Normalización y limpieza de estructuras
         df_e = self.limpiar_data(df_e)
@@ -57,7 +57,7 @@ class InclusiónETL:
             'Sede de tienda', 'Fecha de evaluación', 'Tipo de sexo', 'Puesto colaborador', 'Observaciones'
         ]
         
-        # Aislamiento de métricas únicas de la segunda pestaña para evitar colisiones
+        # Aislamiento de métricas únicas de la segunda pestaña para evitar duplicaciones
         cols_unicas_c = ['ID'] + [col for col in df_c.columns if col not in columnas_comunes and col != 'ID']
         df_checklist_unique = df_c[cols_unicas_c]
         df_checklist_unique = df_checklist_unique.loc[:, ~df_checklist_unique.columns.duplicated()]
