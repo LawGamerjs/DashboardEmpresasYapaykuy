@@ -6,24 +6,18 @@ import streamlit as st
 
 class InclusiónETL:
     def __init__(self):
-        # El token de publicación web de tu documento
-        self.pub_token = "2PACX-1vQg11ARQRQzhifajGDtbWDe37uqN_VGQu7eCIoRorMxWC-V18qC6YmudtzLAtVru9DJ9IIIra-qqslU"
+        # ID verificado del documento editable compartido
+        self.spreadsheet_id = "12PoHZr0BMJux4IxW7A3z7d0NdeLsXUkl5AmUO2xLEok"
         
-        # Formato de exportación nativo para enlaces publicados en la web de Google (pub?output=csv&gid=ID)
-        self.url_entrevistas = f"https://docs.google.com/spreadsheets/d/e/{self.pub_token}/pub?output=csv&gid=0"
-        self.url_checklist = f"https://docs.google.com/spreadsheets/d/e/{self.pub_token}/pub?output=csv&gid=55513259"
+        # URLs de exportación directa utilizando los GIDs reales de datos
+        self.url_entrevistas = f"https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}/export?format=csv&gid=0"
+        self.url_checklist = f"https://docs.google.com/spreadsheets/d/{self.spreadsheet_id}/export?format=csv&gid=111429532"
         
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
 
-    def log_diagnostico(self, titulo: str, mensaje: str, tipo: str = "info"):
-        log_msg = f"[LOG - PIPELINE] {titulo}: {mensaje}"
-        print(log_msg)
-        if tipo == "error":
-            st.error(log_msg)
-
-    def descargar_csv_con_logs(self, url: str, nombre_hoja: str) -> pd.DataFrame:
+    def descargar_csv(self, url: str, nombre_hoja: str) -> pd.DataFrame:
         try:
             req = urllib.request.Request(url, headers=self.headers)
             with urllib.request.urlopen(req) as response:
@@ -32,14 +26,10 @@ class InclusiónETL:
                 return df
         except urllib.error.HTTPError as e:
             cuerpo_error = e.read().decode('utf-8', errors='ignore') if hasattr(e, 'read') else "Sin cuerpo"
-            self.log_diagnostico(
-                f"HTTPError {e.code} en {nombre_hoja}", 
-                f"Asegúrate de que la pestaña Checklist esté visible en la web. Detalles: {cuerpo_error[:200]}", 
-                tipo="error"
-            )
+            st.error(f"[ETL ERROR] Fallo en {nombre_hoja} (Código: {e.code}). Verifica que el acceso general esté en 'Cualquier persona con el enlace'.")
             raise e
         except Exception as e:
-            self.log_diagnostico(f"Fallo en {nombre_hoja}", str(e), tipo="error")
+            st.error(f"[ETL ERROR] Fallo inesperado en {nombre_hoja}: {str(e)}")
             raise e
 
     def limpiar_data(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -51,9 +41,11 @@ class InclusiónETL:
         return df
 
     def ejecutar_pipeline_en_vivo(self) -> pd.DataFrame:
-        df_e = self.descargar_csv_con_logs(self.url_entrevistas, "Entrevistas (gid=0)")
-        df_c = self.descargar_csv_con_logs(self.url_checklist, "Checklist (gid=55513259)")
+        # Descarga de los conjuntos de datos independientes
+        df_e = self.descargar_csv(self.url_entrevistas, "Entrevistas (gid=0)")
+        df_c = self.descargar_csv(self.url_checklist, "Checklist (gid=111429532)")
 
+        # Normalización y limpieza de estructuras
         df_e = self.limpiar_data(df_e)
         df_c = self.limpiar_data(df_c)
 
@@ -65,10 +57,12 @@ class InclusiónETL:
             'Sede de tienda', 'Fecha de evaluación', 'Tipo de sexo', 'Puesto colaborador', 'Observaciones'
         ]
         
+        # Aislamiento de métricas únicas de la segunda pestaña para evitar colisiones
         cols_unicas_c = ['ID'] + [col for col in df_c.columns if col not in columnas_comunes and col != 'ID']
         df_checklist_unique = df_c[cols_unicas_c]
         df_checklist_unique = df_checklist_unique.loc[:, ~df_checklist_unique.columns.duplicated()]
 
+        # Consolidación final por ID de colaborador
         df_final = pd.merge(df_e, df_checklist_unique, on='ID', how='outer')
 
         if 'Fecha de evaluación' in df_final.columns:
