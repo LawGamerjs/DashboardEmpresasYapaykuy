@@ -3,8 +3,8 @@ import pandas as pd
 class InclusiónETL:
     def __init__(self):
         self.pub_token = "2PACX-1vQg11ARQRQzhifajGDtbWDe37uqN_VGQu7eCIoRorMxWC-V18qC6YmudtzLAtVru9DJ9IIIra-qqslU"
-        self.url_entrevistas = f"https://docs.google.com/spreadsheets/d/e/{self.pub_token}/pub?output=csv&gid=0"
-        self.url_checklist = f"https://docs.google.com/spreadsheets/d/e/{self.pub_token}/pub?output=csv&gid=111429532"
+        self.url_entrevistas = f"https://docs.google.com/spreadsheets/d/e/{self.pub_token}/pub?gid=0&output=csv"
+        self.url_checklist = f"https://docs.google.com/spreadsheets/d/e/{self.pub_token}/pub?gid=111429532&output=csv"
 
     def limpiar_data(self, df: pd.DataFrame) -> pd.DataFrame:
         df.columns = [str(col).strip() for col in df.columns]
