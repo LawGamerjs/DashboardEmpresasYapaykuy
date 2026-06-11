@@ -94,7 +94,7 @@ with tab1:
         st.metric("% Satisfechos Ambiente", f"{v_ambiente}%")
         
     st.markdown("---")
-    st.subheader("💡 Inclusión y Accesibilidad")
+    st.subheader("Inclusión y Accesibilidad")
     ca1, ca2, ca3, ca4, ca5 = st.columns(5)
     
     with ca1:
@@ -163,7 +163,7 @@ with tab1:
         st.plotly_chart(fig_salida, use_container_width=True)
 
     st.markdown("---")
-    st.subheader("🦾 Adaptaciones del Puesto (Frecuencia de Requerimientos)")
+    st.subheader("Adaptaciones del Puesto (Frecuencia de Requerimientos)")
     cb1, cb2, cb3, cb4 = st.columns(4)
     
     with cb1:
@@ -257,7 +257,7 @@ with tab2:
     with col_f2:
         st.subheader("KPI 7: Recomendación Técnica Automatizada")
         st.info(
-            "💡 **Dictamen de Inclusión Operativa:**\n\n"
+            "**Dictamen de Inclusión Operativa:**\n\n"
             f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
