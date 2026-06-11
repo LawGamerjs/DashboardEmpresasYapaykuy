@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from etl_pipeline import InclusiónETL
 
-st.set_page_config(page_title="Dashboard de Inclusión Yapaykuy", layout="wide")
+st.set_page_config(page_title="Dashboard de Colaboradores Cencosud", layout="wide")
 
 @st.cache_data(ttl=60)
 def cargar_datos_totales():
@@ -18,7 +18,7 @@ except Exception as e:
     st.stop()
 
 st.sidebar.header("Filtros Globales")
-if st.sidebar.button("🔄 Sincronizar Google Sheets en Vivo"):
+if st.sidebar.button("Sincronizar Google Sheets"):
     st.cache_data.clear()
     st.rerun()
 
@@ -47,7 +47,7 @@ if puesto_sel:
     if 'Puesto colaborador' in df_ent_fil.columns: df_ent_fil = df_ent_fil[df_ent_fil['Puesto colaborador'].isin(puesto_sel)]
     if 'Puesto colaborador' in df_chk_fil.columns: df_chk_fil = df_chk_fil[df_chk_fil['Puesto colaborador'].isin(puesto_sel)]
 
-tab1, tab2, tab3 = st.tabs(["📋 KPIs Entrevistas", "🛠️ KPIs Checklist de Puesto", "🔍 Buscador y Detalles"])
+tab1, tab2, tab3 = st.tabs(["KPIs Entrevistas", "KPIs Checklist de Puesto", "Buscador y Detalles"])
 
 with tab1:
     st.header("Métricas e Indicadores de Entrevistas de Inclusión")
@@ -55,7 +55,7 @@ with tab1:
     
     total_ent = len(df_ent_fil) if len(df_ent_fil) > 0 else 1
     
-    st.subheader("😊 Bienestar Laboral")
+    st.subheader("Bienestar Laboral")
     c1, c2, c3, c4, c5 = st.columns(5)
     
     with c1:
@@ -136,7 +136,7 @@ with tab1:
     g_col1, g_col2 = st.columns(2)
     
     with g_col1:
-        st.subheader("⚠️ Riesgos Psicosociales (Casos Detectados)")
+        st.subheader("Riesgos Psicosociales (Casos Detectados)")
         c_bullying = df_ent_fil['Presencia de acoso o Bulling u otro'].astype(str).str.lower().str.contains('sí|si|alerta').sum() if 'Presencia de acoso o Bulling u otro' in df_ent_fil.columns else 0
         c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
         c_conf = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('conflict|discusión').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
@@ -151,7 +151,7 @@ with tab1:
         st.plotly_chart(fig_psico, use_container_width=True)
         
     with g_col2:
-        st.subheader("📉 Riesgo de Salida de la Empresa")
+        st.subheader("Riesgo de Salida de la Empresa")
         c_salida_si = 0
         c_salida_no = len(df_ent_fil)
         if 'Riesgo de salida de la empresa' in df_ent_fil.columns:
@@ -198,27 +198,27 @@ with tab2:
         
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="🏆 KPI 1: Índice General de Compatibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
+        st.metric(label="KPI 1: Índice General de Compatibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
     with col2:
         exigencia_alta = "Moderada"
         if 'Estrés por carga laboral ' in df_filtrado.columns:
             porc_estres = (df_filtrado['Estrés por carga laboral '].astype(str).str.lower().str.contains('sí|alto').sum() / len(df_filtrado)) * 100
             if porc_estres > 40: exigencia_alta = "Alta ⚠️"
             elif porc_estres < 15: exigencia_alta = "Baja"
-        st.metric(label="📊 KPI 4: Nivel de Exigencia Promedio del Puesto", value=exigencia_alta)
+        st.metric(label="KPI 4: Nivel de Exigencia Promedio del Puesto", value=exigencia_alta)
     with col3:
         req_ajuste = 0
         if 'Requires medidas de apoyo' in df_filtrado.columns or 'Requiere medidas de apoyo' in df_filtrado.columns:
             col_medidas = 'Requiere medidas de apoyo' if 'Requiere medidas de apoyo' in df_filtrado.columns else 'Requires medidas de apoyo'
             req_ajuste = df_filtrado[col_medidas].astype(str).str.lower().str.contains('sí|requiere').sum()
-        st.metric(label="🚨 KPI 6: Colaboradores que Requieren Ajustes", value=f"{req_ajuste} Pers.")
+        st.metric(label="KPI 6: Colaboradores que Requieren Ajustes", value=f"{req_ajuste} Pers.")
 
     st.markdown("---")
 
     col_g1, col_g2 = st.columns(2)
     
     with col_g1:
-        st.subheader("🛠️ KPI 2: Cumplimiento Promedio por Dimensión Operativa")
+        st.subheader("KPI 2: Cumplimiento Promedio por Dimensión Operativa")
         dim_data = {
             "Dimensión": ["Autonomía", "Adaptación a Cambios", "Seguridad Laboral", "Comprensión", "Ritmo de Entrega"],
             "Cumplimiento (%)": [84.2, 79.1, 91.5, 88.0, 72.4]
@@ -230,7 +230,7 @@ with tab2:
         st.plotly_chart(fig_dims, use_container_width=True)
 
     with col_g2:
-        st.subheader("🎯 KPI 3: Distribución de Ajuste Puesto-Persona")
+        st.subheader("KPI 3: Distribución de Ajuste Puesto-Persona")
         ajuste_labels = ['Ajuste Óptimo', 'Requiere Monitoreo', 'Desalineado / Alerta']
         ajuste_valores = [int(len(df_filtrado)*0.7), int(len(df_filtrado)*0.2), int(len(df_filtrado)*0.1) + 1]
         fig_pie = go.Figure(data=[go.Pie(labels=ajuste_labels, values=ajuste_valores, hole=.4,
@@ -243,7 +243,7 @@ with tab2:
     col_f1, col_f2 = st.columns(2)
     
     with col_f1:
-        st.subheader("🚧 KPI 5: Principales Barreras Identificadas en Tienda")
+        st.subheader("KPI 5: Principales Barreras Identificadas en Tienda")
         barreras_data = {
             "Factor de Riesgo / Barrera": ["Infraestructura / Accesibilidad", "Instrucciones Complejas", "Ritmo de Carga de Trabajo", "Interacción Crítica con Clientes"],
             "Casos Reportados": [2, 5, 4, 3]
@@ -255,7 +255,7 @@ with tab2:
         st.plotly_chart(fig_barreras, use_container_width=True)
 
     with col_f2:
-        st.subheader("📋 KPI 7: Recomendación Técnica Automatizada")
+        st.subheader("KPI 7: Recomendación Técnica Automatizada")
         st.info(
             "💡 **Dictamen de Inclusión Operativa:**\n\n"
             f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
@@ -268,14 +268,14 @@ with tab3:
     st.markdown("Selecciona una de las fuentes de datos de Google Sheets para explorar los registros o realizar búsquedas específicas.")
 
     sub_tab_consolidado, sub_tab_entrevistas, sub_tab_checklist = st.tabs([
-        "🤝 Datos Consolidados (Cruce)", 
-        "📄 Hoja 1: Entrevistas", 
-        "📋 Hoja 2: Checklist de Puesto"
+        "Datos Consolidados (Cruce)", 
+        "Hoja 1: Entrevistas", 
+        "Hoja 2: Checklist de Puesto"
     ])
 
     with sub_tab_consolidado:
         st.subheader("Matriz Integrada (Entrevistas + Checklist)")
-        search_con = st.text_input("🔍 Buscar por Nombre o ID en la tabla combinada:", key="search_con")
+        search_con = st.text_input("Buscar por Nombre o ID en la tabla combinada:", key="search_con")
         df_display_con = df_filtrado.copy()
         
         if search_con:
@@ -288,7 +288,7 @@ with tab3:
 
     with sub_tab_entrevistas:
         st.subheader("Registros Originales de la pestaña: 'Entrevistas'")
-        search_ent = st.text_input("🔍 Filtrar registros en Entrevistas:", key="search_ent")
+        search_ent = st.text_input("Filtrar registros en Entrevistas:", key="search_ent")
         df_display_ent = df_ent_fil.copy()
         
         if search_ent:
@@ -299,8 +299,8 @@ with tab3:
         st.dataframe(df_display_ent, use_container_width=True, hide_index=True)
 
     with sub_tab_checklist:
-        st.subheader("Registros Originales de la pestaña: 'Ckecklist de puesto'")
-        search_chk = st.text_input("🔍 Filtrar registros en Checklist:", key="search_chk")
+        st.subheader("Registros Originales de la pestaña: 'Checklist de puesto'")
+        search_chk = st.text_input("Filtrar registros en Checklist:", key="search_chk")
         df_display_chk = df_chk_fil.copy()
         
         if search_chk:
