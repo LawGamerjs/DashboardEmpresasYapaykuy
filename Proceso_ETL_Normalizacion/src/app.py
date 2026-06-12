@@ -30,6 +30,33 @@ sede_sel = st.sidebar.multiselect("Sede de Tienda", options=sedes)
 disc_sel = st.sidebar.multiselect("Tipo de Discapacidad", options=discapacidades)
 puesto_sel = st.sidebar.multiselect("Puesto Colaborador", options=puestos)
 
+st.sidebar.markdown("---")
+st.sidebar.header("🔍 Auditoría por Indicador")
+
+opciones_alerta = [
+    "Ver todos los registros",
+    "Cómodos en Puesto (Resignación de cambio de puesto = No)",
+    "Cómodos en Sede (Recomendación cambio de sede = No)",
+    "Trabajan Tranquilos (Trabaja con tranquilidad = Sí)",
+    "Estrés Carga Laboral (Estrés por carga laboral = Sí)",
+    "Satisfechos con el Ambiente (Entorno Tranquilo)",
+    "Instrucciones Adaptadas (Requiere instrucciones adaptadas = Sí)",
+    "Requiere Apoyo Jefe (Apoyo principal = Jefe)",
+    "Apoyos Visuales (Formato Preferido = Visual)",
+    "Apoyos Escritos (Formato Preferido = Escrito)",
+    "Apoyos Verbales (Formato Preferido = Verbal)",
+    "Problemas Clientes (Retos con clientes)",
+    "Bullying / Discriminación (Presencia Bulling)",
+    "Conflictos Compañeros (Presencia conflictos)",
+    "Riesgo de Salida Activo",
+    "Resignación de Puesto Activa",
+    "Ajustes Ergonómicos (Control de Ruido)",
+    "Especificos de Accesibilidad (Mejora solicitada)",
+    "Checklist: Compatibilidad Alta (Ajuste puesto persona)"
+]
+
+alerta_sel = st.sidebar.selectbox("Selecciona un indicador para ver los colaboradores específicos:", options=opciones_alerta)
+
 df_filtrado = df_consolidado.copy()
 df_ent_fil = df_entrevistas_raw.copy()
 df_chk_fil = df_checklist_raw.copy()
@@ -51,10 +78,75 @@ if puesto_sel:
     if 'Puesto colaborador' in df_ent_fil.columns: df_ent_fil = df_ent_fil[df_ent_fil['Puesto colaborador'].isin(puesto_sel)]
     if 'Puesto colaborador' in df_chk_fil.columns: df_chk_fil = df_chk_fil[df_chk_fil['Puesto colaborador'].isin(puesto_sel)]
 
+df_audit_ent = df_ent_fil.copy()
+df_audit_chk = df_chk_fil.copy()
+mostrar_tabla_chk = False
+
+if alerta_sel == "Cómodos en Puesto (Resignación de cambio de puesto = No)":
+    if 'Resignación de cambio de puesto' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[~df_audit_ent['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
+elif alerta_sel == "Cómodos en Sede (Recomendación cambio de sede = No)":
+    if 'Recomendación cambio de sede' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[~df_audit_ent['Recomendación cambio de sede'].astype(str).str.lower().str.contains('sí|requiere')]
+elif alerta_sel == "Trabajan Tranquilos (Trabaja con tranquilidad = Sí)":
+    if 'Trabaja con tranquilidad' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Trabaja con tranquilidad'].astype(str).str.lower().str.contains('sí|bueno|si')]
+elif alerta_sel == "Estrés Carga Laboral (Estrés por carga laboral = Sí)":
+    if 'Estrés por carga laboral' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto|si')]
+elif alerta_sel == "Satisfechos con el Ambiente (Entorno Tranquilo)":
+    if 'Ambiente de trabajo' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Ambiente de trabajo'].astype(str).str.lower().str.strip().str.contains('tranquilo')]
+elif alerta_sel == "Instrucciones Adaptadas (Requiere instrucciones adaptadas = Sí)":
+    if 'Requiere instrucciones adaptadas' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Requiere instrucciones adaptadas'].astype(str).str.lower().str.contains('sí|si')]
+elif alerta_sel == "Requiere Apoyo Jefe (Apoyo principal = Jefe)":
+    if 'Apoyo principal' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor')]
+elif alerta_sel == "Apoyos Visuales (Formato Preferido = Visual)":
+    if 'Formato Preferido de apoyo' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual')]
+elif alerta_sel == "Apoyos Escritos (Formato Preferido = Escrito)":
+    if 'Formato Preferido de apoyo' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.strip().str.contains('escrito')]
+elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
+    if 'Formato Preferido de apoyo' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación')]
+elif alerta_sel == "Problemas Clientes (Retos con clientes)":
+    if 'Retos en la relación con clientes' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja')]
+elif alerta_sel == "Bullying / Discriminación (Presencia Bulling)":
+    if 'Presencia Bulling' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
+elif alerta_sel == "Conflictos Compañeros (Presencia conflictos)":
+    if 'Presencia conflictos' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
+elif alerta_sel == "Riesgo de Salida Activo":
+    if 'Riesgo de salida de la empresa' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado')]
+elif alerta_sel == "Resignación de Puesto Activa":
+    if 'Resignación de cambio de puesto' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
+elif alerta_sel == "Especificos de Accesibilidad (Mejora solicitada)":
+    if 'Mejora solicitada' in df_audit_ent.columns:
+        textos_m = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
+        df_audit_ent = df_audit_ent[textos_m.str.startswith('intérprete') | textos_m.str.startswith('interprete') | (textos_m == 'que tenga un distintivo de sordo')]
+elif alerta_sel == "Ajustes Ergonómicos (Control de Ruido)":
+    if 'Mejora solicitada' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido')]
+elif alerta_sel == "Checklist: Compatibilidad Alta (Ajuste puesto persona)":
+    if 'Ajuste puesto persona' in df_audit_chk.columns:
+        df_audit_chk = df_audit_chk[df_audit_chk['Ajuste puesto persona'].astype(str).str.lower().str.strip().str.contains('alto')]
+        mostrar_tabla_chk = True
+
 tab1, tab2, tab3 = st.tabs(["KPIs Entrevistas", "KPIs Checklist de Puesto", "Buscador y Detalles"])
 
 with tab1:
     st.header("Métricas e Indicadores de Entrevistas de Inclusión")
+    
+    if alerta_sel != "Ver todos los registros":
+        st.warning(f"Filtrando métricas y gráficos para el indicador: **{alerta_sel}**")
+        
     st.markdown("---")
     
     total_ent = len(df_ent_fil) if len(df_ent_fil) > 0 else 1
@@ -141,17 +233,9 @@ with tab1:
     
     with g_col1:
         st.subheader("Riesgos Psicosociales (Casos Detectados)")
-        
-        c_bullying = 0
-        if 'Presencia Bulling' in df_ent_fil.columns:
-            c_bullying = df_ent_fil['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
-            
+        c_bullying = df_ent_fil['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Presencia Bulling' in df_ent_fil.columns else 0
         c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
-        
-        c_conf = 0
-        if 'Presencia conflictos' in df_ent_fil.columns:
-            c_conf = df_ent_fil['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
-            
+        c_conf = df_ent_fil['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Presencia conflictos' in df_ent_fil.columns else 0
         c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja').sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
         
         df_psico = pd.DataFrame({
@@ -164,14 +248,8 @@ with tab1:
         
     with g_col2:
         st.subheader("Riesgo de Salida y Solicitudes de Cambio")
-        
-        c_salida_si = 0
-        if 'Riesgo de salida de la empresa' in df_ent_fil.columns:
-            c_salida_si = df_ent_fil['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado').sum()
-            
-        c_resignacion_si = 0
-        if 'Resignación de cambio de puesto' in df_ent_fil.columns:
-            c_resignacion_si = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
+        c_salida_si = df_ent_fil['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado').sum() if 'Riesgo de salida de la empresa' in df_ent_fil.columns else 0
+        c_resignacion_si = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Resignación de cambio de puesto' in df_ent_fil.columns else 0
 
         df_salida_kpis = pd.DataFrame({
             "Indicador": ["En Riesgo de Salida", "Resignación de Puesto"],
@@ -186,9 +264,7 @@ with tab1:
     cb1, cb2, cb3, cb4 = st.columns(4)
     
     with cb1:
-        c_erg = 0
-        if 'Mejora solicitada' in df_ent_fil.columns:
-            c_erg = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido').sum()
+        c_erg = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido').sum() if 'Mejora solicitada' in df_ent_fil.columns else 0
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
         c_rest = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('física|movimiento|desplazar').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
@@ -233,7 +309,6 @@ with tab2:
         st.metric(label="KPI 6: Colaboradores que Requieren Ajustes", value=f"{req_ajuste} Pers.")
 
     st.markdown("---")
-
     col_g1, col_g2 = st.columns(2)
     
     with col_g1:
@@ -258,7 +333,6 @@ with tab2:
         st.plotly_chart(fig_pie, use_container_width=True)
 
     st.markdown("---")
-
     col_f1, col_f2 = st.columns(2)
     
     with col_f1:
@@ -277,7 +351,7 @@ with tab2:
         st.subheader("KPI 7: Recomendación Técnica Automatizada")
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
@@ -285,101 +359,17 @@ with tab2:
 with tab3:
     st.header("Explorador y Auditoría de Datos en Tiempo Real")
     st.markdown("---")
-    st.subheader("🔍 Auditoría Específica por Tipo de Alerta o Indicador")
     
-    opciones_alerta = [
-        "Ver todos los registros",
-        "Cómodos en Puesto (Resignación de cambio de puesto = No)",
-        "Cómodos en Sede (Recomendación cambio de sede = No)",
-        "Trabajan Tranquilos (Trabaja con tranquilidad = Sí)",
-        "Estrés Carga Laboral (Estrés por carga laboral = Sí)",
-        "Satisfechos con el Ambiente (Entorno Tranquilo)",
-        "Instrucciones Adaptadas (Requiere instrucciones adaptadas = Sí)",
-        "Requiere Apoyo Jefe (Apoyo principal = Jefe)",
-        "Apoyos Visuales (Formato Preferido = Visual)",
-        "Apoyos Escritos (Formato Preferido = Escrito)",
-        "Apoyos Verbales (Formato Preferido = Verbal)",
-        "Problemas Clientes (Retos con clientes)",
-        "Bullying / Discriminación (Presencia Bulling)",
-        "Conflictos Compañeros (Presencia conflictos)",
-        "Riesgo de Salida Activo",
-        "Resignación de Puesto Activa",
-        "Ajustes Ergonómicos (Control de Ruido)",
-        "Especificos de Accesibilidad (Mejora solicitada)",
-        "Checklist: Compatibilidad Alta (Ajuste puesto persona)"
-    ]
-    
-    alerta_sel = st.selectbox("Selecciona un indicador para ver los colaboradores específicos:", options=opciones_alerta)
-    
-    df_audit_ent = df_ent_fil.copy()
-    df_audit_chk = df_chk_fil.copy()
-    
-    mostrar_tabla_chk = False
-    
-    if alerta_sel == "Cómodos en Puesto (Resignación de cambio de puesto = No)":
-        if 'Resignación de cambio de puesto' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[~df_audit_ent['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
-    elif alerta_sel == "Cómodos en Sede (Recomendación cambio de sede = No)":
-        if 'Recomendación cambio de sede' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[~df_audit_ent['Recomendación cambio de sede'].astype(str).str.lower().str.contains('sí|requiere')]
-    elif alerta_sel == "Trabajan Tranquilos (Trabaja con tranquilidad = Sí)":
-        if 'Trabaja con tranquilidad' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Trabaja con tranquilidad'].astype(str).str.lower().str.contains('sí|bueno|si')]
-    elif alerta_sel == "Estrés Carga Laboral (Estrés por carga laboral = Sí)":
-        if 'Estrés por carga laboral' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto|si')]
-    elif alerta_sel == "Satisfechos con el Ambiente (Entorno Tranquilo)":
-        if 'Ambiente de trabajo' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Ambiente de trabajo'].astype(str).str.lower().str.strip().str.contains('tranquilo')]
-    elif alerta_sel == "Instrucciones Adaptadas (Requiere instrucciones adaptadas = Sí)":
-        if 'Requiere instrucciones adaptadas' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Requiere instrucciones adaptadas'].astype(str).str.lower().str.contains('sí|si')]
-    elif alerta_sel == "Requiere Apoyo Jefe (Apoyo principal = Jefe)":
-        if 'Apoyo principal' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor')]
-    elif alerta_sel == "Apoyos Visuales (Formato Preferido = Visual)":
-        if 'Formato Preferido de apoyo' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual')]
-    elif alerta_sel == "Apoyos Escritos (Formato Preferido = Escrito)":
-        if 'Formato Preferido de apoyo' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.strip().str.contains('escrito')]
-    elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
-        if 'Formato Preferido de apoyo' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación')]
-    elif alerta_sel == "Problemas Clientes (Retos con clientes)":
-        if 'Retos en la relación con clientes' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja')]
-    elif alerta_sel == "Bullying / Discriminación (Presencia Bulling)":
-        if 'Presencia Bulling' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
-    elif alerta_sel == "Conflictos Compañeros (Presencia conflictos)":
-        if 'Presencia conflictos' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
-    elif alerta_sel == "Riesgo de Salida Activo":
-        if 'Riesgo de salida de la empresa' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado')]
-    elif alerta_sel == "Resignación de Puesto Activa":
-        if 'Resignación de cambio de puesto' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
-    elif alerta_sel == "Especificos de Accesibilidad (Mejora solicitada)":
-        if 'Mejora solicitada' in df_audit_ent.columns:
-            textos_m = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
-            df_audit_ent = df_audit_ent[textos_m.str.startswith('intérprete') | textos_m.str.startswith('interprete') | (textos_m == 'que tenga un distintivo de sordo')]
-    elif alerta_sel == "Ajustes Ergonómicos (Control de Ruido)":
-        if 'Mejora solicitada' in df_audit_ent.columns:
-            df_audit_ent = df_audit_ent[df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido')]
-    elif alerta_sel == "Checklist: Compatibilidad Alta (Ajuste puesto persona)":
-        if 'Ajuste puesto persona' in df_audit_chk.columns:
-            df_audit_chk = df_audit_chk[df_audit_chk['Ajuste puesto persona'].astype(str).str.lower().str.strip().str.contains('alto')]
-            mostrar_tabla_chk = True
-
-    if alerta_sel != "Ver todos los registros":
-        st.info(f"Filtrando resultados para el indicador: **{alerta_sel}**")
+    st.subheader("🕵️ Colaboradores Específicos Identificados")
+    if alerta_sel == "Ver todos los registros":
+        st.info("Utiliza el buscador de la barra lateral izquierda **'Auditoría por Indicador'** para aislar los nombres de los colaboradores que cumplen con cada métrica.")
+    else:
+        st.success(f"Registros filtrados para el indicador seleccionado en la barra lateral: **{alerta_sel}**")
         if mostrar_tabla_chk:
-            st.metric("Colaboradores identificados", len(df_audit_chk))
+            st.metric("Total de Colaboradores", len(df_audit_chk))
             st.dataframe(df_audit_chk[['ID', 'Nombre del colaborador', 'Sede de tienda', 'Puesto colaborador', 'Ajuste puesto persona']], use_container_width=True, hide_index=True)
         else:
-            st.metric("Colaboradores identificados", len(df_audit_ent))
+            st.metric("Total de Colaboradores", len(df_audit_ent))
             columnas_vista = ['ID', 'Nombre del colaborador', 'Sede de tienda', 'Puesto colaborador']
             col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', 'Presencia Bulling', 'Presencia conflictos', 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
             st.dataframe(df_audit_ent[columnas_vista + col_extra], use_container_width=True, hide_index=True)
