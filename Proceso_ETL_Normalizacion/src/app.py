@@ -34,16 +34,20 @@ df_filtrado = df_consolidado.copy()
 df_ent_fil = df_entrevistas_raw.copy()
 df_chk_fil = df_checklist_raw.copy()
 
+df_ent_fil.columns = df_ent_fil.columns.str.strip()
+df_chk_fil.columns = df_chk_fil.columns.str.strip()
+df_filtrado.columns = df_filtrado.columns.str.strip()
+
 if sede_sel:
-    df_filtrado = df_filtrado[df_filtrado['Sede de tienda'].isin(sede_sel)]
+    if 'Sede de tienda' in df_filtrado.columns: df_filtrado = df_filtrado[df_filtrado['Sede de tienda'].isin(sede_sel)]
     if 'Sede de tienda' in df_ent_fil.columns: df_ent_fil = df_ent_fil[df_ent_fil['Sede de tienda'].isin(sede_sel)]
     if 'Sede de tienda' in df_chk_fil.columns: df_chk_fil = df_chk_fil[df_chk_fil['Sede de tienda'].isin(sede_sel)]
 if disc_sel:
-    df_filtrado = df_filtrado[df_filtrado['Tipo de discapacidad'].isin(disc_sel)]
+    if 'Tipo de discapacidad' in df_filtrado.columns: df_filtrado = df_filtrado[df_filtrado['Tipo de discapacidad'].isin(disc_sel)]
     if 'Tipo de discapacidad' in df_ent_fil.columns: df_ent_fil = df_ent_fil[df_ent_fil['Tipo de discapacidad'].isin(disc_sel)]
     if 'Tipo de discapacidad' in df_chk_fil.columns: df_chk_fil = df_chk_fil[df_chk_fil['Tipo de discapacidad'].isin(disc_sel)]
 if puesto_sel:
-    df_filtrado = df_filtrado[df_filtrado['Puesto colaborador'].isin(puesto_sel)]
+    if 'Puesto colaborador' in df_filtrado.columns: df_filtrado = df_filtrado[df_filtrado['Puesto colaborador'].isin(puesto_sel)]
     if 'Puesto colaborador' in df_ent_fil.columns: df_ent_fil = df_ent_fil[df_ent_fil['Puesto colaborador'].isin(puesto_sel)]
     if 'Puesto colaborador' in df_chk_fil.columns: df_chk_fil = df_chk_fil[df_chk_fil['Puesto colaborador'].isin(puesto_sel)]
 
@@ -74,15 +78,15 @@ with tab1:
         
     with c3:
         v_trankilidad = 80.0
-        if 'Trabaja con tranquilidad ' in df_ent_fil.columns:
-            si_trank = df_ent_fil['Trabaja con tranquilidad '].astype(str).str.lower().str.contains('sí|bueno|si').sum()
+        if 'Trabaja con tranquilidad' in df_ent_fil.columns:
+            si_trank = df_ent_fil['Trabaja con tranquilidad'].astype(str).str.lower().str.contains('sí|bueno|si').sum()
             v_trankilidad = round((si_trank / total_ent) * 100, 1)
         st.metric("% Trabajan Tranquilos", f"{v_trankilidad}%")
         
     with c4:
         v_estres = 20.0
-        if 'Estrés por carga laboral ' in df_ent_fil.columns:
-            si_estres = df_ent_fil['Estrés por carga laboral '].astype(str).str.lower().str.contains('sí|alto|si').sum()
+        if 'Estrés por carga laboral' in df_ent_fil.columns:
+            si_estres = df_ent_fil['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto|si').sum()
             v_estres = round((si_estres / total_ent) * 100, 1)
         st.metric("% Estrés Carga Laboral", f"{v_estres}%")
         
@@ -139,8 +143,8 @@ with tab1:
         st.subheader("Riesgos Psicosociales (Casos Detectados)")
         
         c_bullying = 0
-        if 'Presencia Bulling ' in df_ent_fil.columns:
-            c_bullying = df_ent_fil['Presencia Bulling '].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
+        if 'Presencia Bulling' in df_ent_fil.columns:
+            c_bullying = df_ent_fil['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
             
         c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
         
@@ -217,16 +221,15 @@ with tab2:
         st.metric(label="KPI 1: Índice General de Compatibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
     with col2:
         exigencia_alta = "Moderada"
-        if 'Estrés por carga laboral ' in df_filtrado.columns:
-            porc_estres = (df_filtrado['Estrés por carga laboral '].astype(str).str.lower().str.contains('sí|alto').sum() / len(df_filtrado)) * 100
+        if 'Estrés por carga laboral' in df_filtrado.columns:
+            porc_estres = (df_filtrado['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto').sum() / len(df_filtrado)) * 100
             if porc_estres > 40: exigencia_alta = "Alta ⚠️"
             elif porc_estres < 15: exigencia_alta = "Baja"
         st.metric(label="KPI 4: Nivel de Exigencia Promedio del Puesto", value=exigencia_alta)
     with col3:
         req_ajuste = 0
-        if 'Requires medidas de apoyo' in df_filtrado.columns or 'Requiere medidas de apoyo' in df_filtrado.columns:
-            col_medidas = 'Requiere medidas de apoyo' if 'Requiere medidas de apoyo' in df_filtrado.columns else 'Requires medidas de apoyo'
-            req_ajuste = df_filtrado[col_medidas].astype(str).str.lower().str.contains('sí|requiere').sum()
+        if 'Requiere medidas de apoyo' in df_filtrado.columns:
+            req_ajuste = df_filtrado['Requiere medidas de apoyo'].astype(str).str.lower().str.contains('sí|requiere').sum()
         st.metric(label="KPI 6: Colaboradores que Requieren Ajustes", value=f"{req_ajuste} Pers.")
 
     st.markdown("---")
@@ -305,7 +308,7 @@ with tab3:
     with sub_tab_entrevistas:
         st.subheader("Registros Originales de la pestaña: 'Entrevistas'")
         search_ent = st.text_input("Filtrar registros en Entrevistas:", key="search_ent")
-        df_display_ent = df_ent_fil.copy()
+        df_display_ent = df_display_ent.copy()
         
         if search_ent:
             mascara_ent = df_display_ent.astype(str).apply(lambda x: x.str.contains(search_ent, case=False)).any(axis=1)
