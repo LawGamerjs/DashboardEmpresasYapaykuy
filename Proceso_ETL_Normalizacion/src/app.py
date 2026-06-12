@@ -123,9 +123,9 @@ with tab1:
         st.metric("% Apoyos Visuales", f"{v_vis}%")
         
     with ca4:
-        v_escr = 25.0
+        v_escr = 0.0
         if 'Formato Preferido de apoyo' in df_ent_fil.columns:
-            si_escr = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrito|texto').sum()
+            si_escr = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.strip().str.contains('escrito').sum()
             v_escr = round((si_escr / total_ent) * 100, 1)
         st.metric("% Apoyos Escritos", f"{v_escr}%")
         
