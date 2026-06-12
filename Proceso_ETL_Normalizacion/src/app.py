@@ -59,9 +59,9 @@ with tab1:
     c1, c2, c3, c4, c5 = st.columns(5)
     
     with c1:
-        v_puesto = 85.0
+        v_puesto = 100.0
         if 'Resignación de cambio de puesto' in df_ent_fil.columns:
-            cambios = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.contains('sí|requiere').sum()
+            cambios = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
             v_puesto = round(((total_ent - cambios) / total_ent) * 100, 1)
         st.metric("% Cómodos en Puesto", f"{v_puesto}%")
         
@@ -159,14 +159,25 @@ with tab1:
         st.plotly_chart(fig_psico, use_container_width=True)
         
     with g_col2:
-        st.subheader("Riesgo de Salida de la Empresa")
+        st.subheader("Riesgo de Salida y Solicitudes de Cambio")
+        
         c_salida_si = 0
         c_salida_no = len(df_ent_fil)
         if 'Riesgo de salida de la empresa' in df_ent_fil.columns:
             c_salida_si = df_ent_fil['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado').sum()
             c_salida_no = len(df_ent_fil) - c_salida_si
             
-        fig_salida = go.Figure(data=[go.Pie(labels=["En Riesgo de Salida", "Estable / Continuidad"], values=[c_salida_si, c_salida_no], hole=.4, marker=dict(colors=['#e74c3c', '#2ecc71']))])
+        c_resignacion_si = 0
+        c_resignacion_no = len(df_ent_fil)
+        if 'Resignación de cambio de puesto' in df_ent_fil.columns:
+            c_resignacion_si = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
+            c_resignacion_no = len(df_ent_fil) - c_resignacion_si
+
+        df_salida_kpis = pd.DataFrame({
+            "Indicador": ["En Riesgo de Salida", "Resignación de Puesto"],
+            "Casos Activos": [c_salida_si, c_resignacion_si]
+        })
+        fig_salida = px.bar(df_salida_kpis, x="Casos Activos", y="Indicador", orientation='h', color="Casos Activos", color_continuous_scale="Reds", text_auto=True)
         fig_salida.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10))
         st.plotly_chart(fig_salida, use_container_width=True)
 
