@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -44,7 +43,7 @@ opciones_alerta = [
     "Instrucciones Adaptadas (Requiere instrucciones adaptadas = Sí)",
     "Requiere Apoyo Jefe (Apoyo principal = Jefe)",
     "Apoyos Visuales (Formato Preferido = Visual)",
-    "Apoyos Escritos (Formato Preferido = Escrito)",
+    "Apoyos Escritos (Formato Preferido = Escrita)",
     "Apoyos Verbales (Formato Preferido = Verbal)",
     "Problemas Clientes (Retos con clientes)",
     "Bullying / Discriminación (Presencia Bulling)",
@@ -107,9 +106,9 @@ elif alerta_sel == "Requiere Apoyo Jefe (Apoyo principal = Jefe)":
 elif alerta_sel == "Apoyos Visuales (Formato Preferido = Visual)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual')]
-elif alerta_sel == "Apoyos Escritos (Formato Preferido = Escrito)":
+elif alerta_sel == "Apoyos Escritos (Formato Preferido = Escrita)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrito')]
+        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrita')]
 elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación')]
@@ -232,7 +231,7 @@ with tab1:
         v_escr = 0.0
         n_escr = 0
         if 'Formato Preferido de apoyo' in df_ent_fil.columns:
-            n_escr = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrito').sum()
+            n_escr = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrita').sum()
             v_escr = round((n_escr / total_ent) * 100, 1)
         st.metric("% Apoyos Escritos", f"{v_escr}%", f"{n_escr} de {total_ent} colab.")
         
@@ -284,7 +283,7 @@ with tab1:
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
         c_rest = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('física|movimiento|desplazar').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
-        st.metric("Restricciones Ficsas", f"{c_rest} Casos")
+        st.metric("Restricciones Físicas", f"{c_rest} Casos")
     with cb3:
         c_peso = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('peso|cargar|almacén|fuerza').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
         st.metric("Dificultades Cargar Peso", f"{c_peso} Casos")
@@ -367,7 +366,7 @@ with tab2:
         st.subheader("Recomendación Técnica Automatizada")
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
