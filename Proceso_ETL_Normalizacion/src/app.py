@@ -87,10 +87,10 @@ with tab1:
         st.metric("% Estrés Carga Laboral", f"{v_estres}%")
         
     with c5:
-        v_ambiente = 88.0
+        v_ambiente = 0.0
         if 'Ambiente de trabajo' in df_ent_fil.columns:
-            buen_amb = df_ent_fil['Ambiente de trabajo'].astype(str).str.lower().str.contains('bueno|excelente|óptimo|adecuado|sí|si').sum()
-            v_ambiente = round((buen_amb / total_ent) * 100, 1)
+            si_tranquilo = df_ent_fil['Ambiente de trabajo'].astype(str).str.lower().str.strip().str.contains('tranquilo').sum()
+            v_ambiente = round((si_tranquilo / total_ent) * 100, 1)
         st.metric("% Satisfechos Ambiente", f"{v_ambiente}%")
         
     st.markdown("---")
@@ -137,16 +137,24 @@ with tab1:
     
     with g_col1:
         st.subheader("Riesgos Psicosociales (Casos Detectados)")
-        c_bullying = df_ent_fil['Presencia de acoso o Bulling u otro'].astype(str).str.lower().str.contains('sí|si|alerta').sum() if 'Presencia de acoso o Bulling u otro' in df_ent_fil.columns else 0
+        
+        c_bullying = 0
+        if 'Presencia Bulling ' in df_ent_fil.columns:
+            c_bullying = df_ent_fil['Presencia Bulling '].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
+            
         c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
-        c_conf = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('conflict|discusión').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
+        
+        c_conf = 0
+        if 'Presencia conflictos' in df_ent_fil.columns:
+            c_conf = df_ent_fil['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
+            
         c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja').sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
         
         df_psico = pd.DataFrame({
             "Riesgo Psicosocial": ["Bullying / Discriminación", "Dificultades Comunicación", "Conflictos Compañeros", "Problemas Clientes"],
             "Casos": [c_bullying, c_comun, c_conf, c_cli]
         })
-        fig_psico = px.bar(df_psico, x="Casos", y="Riesgo Psicosocial", orientation='h', color="Casos", color_continuous_scale="Oranges")
+        fig_psico = px.bar(df_psico, x="Casos", y="Riesgo Psicosocial", orientation='h', color="Casos", color_continuous_scale="Oranges", text_auto=True)
         fig_psico.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10))
         st.plotly_chart(fig_psico, use_container_width=True)
         
@@ -167,32 +175,33 @@ with tab1:
     cb1, cb2, cb3, cb4 = st.columns(4)
     
     with cb1:
-        c_erg = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.contains('silla|ergonom|mesa|postura|mueble').sum() if 'Mejora solicitada' in df_ent_fil.columns else 1
+        c_erg = 0
+        if 'Mejora solicitada' in df_ent_fil.columns:
+            c_erg = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido').sum()
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
         c_rest = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('física|movimiento|desplazar').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
         st.metric("Restricciones Físicas", f"{c_rest} Casos")
     with cb3:
-        c_peso = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('peso|cargar|almacén|fuerza').sum() if 'Actividad más difícil' in df_ent_fil.columns else 2
+        c_peso = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('peso|cargar|almacén|fuerza').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
         st.metric("Dificultades Cargar Peso", f"{c_peso} Casos")
     with cb4:
-        c_acc = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.contains('rampa|acceso|ascensor|baño|infraestructura').sum() if 'Mejora solicitada' in df_ent_fil.columns else 0
+        c_acc = 0
+        if 'Mejora solicitada' in df_ent_fil.columns:
+            textos_m = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip()
+            c_acc = (textos_m.str.startswith('intérprete') | textos_m.str.startswith('interprete') | (textos_m == 'que tenga un distintivo de sordo')).sum()
         st.metric("Especificos Accesibilidad", f"{c_acc} Casos")
 
 with tab2:
     st.header("Métricas de Desempeño y Capacidad Operativa (Checklist)")
     st.markdown("---")
     
-    cols_operativas = [
-        'Trabaja con tranquilidad ', 'Las indicaciones de su trabajo son claras',
-        'Cumple Procedimientos', 'Cumple Tiempos de Entrega', 'Comprende Instrucciones', 'Identifica Prioridades'
-    ]
-    cols_presentes = [c for c in cols_operativas if c in df_filtrado.columns]
+    total_chk = len(df_chk_fil) if len(df_chk_fil) > 0 else 1
     
-    if cols_presentes:
-        df_num = df_filtrado[cols_presentes].apply(pd.to_numeric, errors='coerce').fillna(0)
-        compatibilidad_gen = round(df_num.mean().mean(), 1)
-        if compatibilidad_gen < 1: compatibilidad_gen *= 100
+    compatibilidad_gen = 0.0
+    if 'Ajuste puesto persona' in df_chk_fil.columns:
+        si_alto = df_chk_fil['Ajuste puesto persona'].astype(str).str.lower().str.strip().str.contains('alto').sum()
+        compatibilidad_gen = round((si_alto / total_chk) * 100, 1)
     else:
         compatibilidad_gen = 78.5
         
