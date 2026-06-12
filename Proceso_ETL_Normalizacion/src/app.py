@@ -151,6 +151,9 @@ with tab1:
     
     total_ent = len(df_ent_fil) if len(df_ent_fil) > 0 else 1
     
+    st.metric(label="Cantidad Global de Colaboradores Evaluados", value=f"{total_ent} Colaboradores")
+    st.markdown("---")
+    
     st.subheader("Bienestar Laboral")
     c1, c2, c3, c4, c5 = st.columns(5)
     
@@ -363,7 +366,7 @@ with tab2:
         st.subheader("KPI 7: Recomendación Técnica Automatizada")
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
