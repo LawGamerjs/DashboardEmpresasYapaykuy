@@ -152,7 +152,7 @@ with tab1:
         
         df_psico = pd.DataFrame({
             "Riesgo Psicosocial": ["Bullying / Discriminación", "Dificultades Comunicación", "Conflictos Compañeros", "Problemas Clientes"],
-            "Casos": [c_bullying, c_comun, c_conf, c_cli]
+            "Casos": [int(c_bullying), int(c_comun), int(c_conf), int(c_cli)]
         })
         fig_psico = px.bar(df_psico, x="Casos", y="Riesgo Psicosocial", orientation='h', color="Casos", color_continuous_scale="Oranges", text_auto=True)
         fig_psico.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10))
@@ -162,20 +162,16 @@ with tab1:
         st.subheader("Riesgo de Salida y Solicitudes de Cambio")
         
         c_salida_si = 0
-        c_salida_no = len(df_ent_fil)
         if 'Riesgo de salida de la empresa' in df_ent_fil.columns:
             c_salida_si = df_ent_fil['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado').sum()
-            c_salida_no = len(df_ent_fil) - c_salida_si
             
         c_resignacion_si = 0
-        c_resignacion_no = len(df_ent_fil)
         if 'Resignación de cambio de puesto' in df_ent_fil.columns:
             c_resignacion_si = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
-            c_resignacion_no = len(df_ent_fil) - c_resignacion_si
 
         df_salida_kpis = pd.DataFrame({
             "Indicador": ["En Riesgo de Salida", "Resignación de Puesto"],
-            "Casos Activos": [c_salida_si, c_resignacion_si]
+            "Casos Activos": [int(c_salida_si), int(c_resignacion_si)]
         })
         fig_salida = px.bar(df_salida_kpis, x="Casos Activos", y="Indicador", orientation='h', color="Casos Activos", color_continuous_scale="Reds", text_auto=True)
         fig_salida.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10))
