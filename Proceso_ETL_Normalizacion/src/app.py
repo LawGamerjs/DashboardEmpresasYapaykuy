@@ -308,7 +308,7 @@ with tab3:
     with sub_tab_entrevistas:
         st.subheader("Registros Originales de la pestaña: 'Entrevistas'")
         search_ent = st.text_input("Filtrar registros en Entrevistas:", key="search_ent")
-        df_display_ent = df_display_ent.copy()
+        df_display_ent = df_ent_fil.copy()
         
         if search_ent:
             mascara_ent = df_display_ent.astype(str).apply(lambda x: x.str.contains(search_ent, case=False)).any(axis=1)
