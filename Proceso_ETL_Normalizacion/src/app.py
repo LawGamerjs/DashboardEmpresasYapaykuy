@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -283,7 +284,7 @@ with tab1:
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
         c_rest = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('física|movimiento|desplazar').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
-        st.metric("Restricciones Físicas", f"{c_rest} Casos")
+        st.metric("Restricciones Ficsas", f"{c_rest} Casos")
     with cb3:
         c_peso = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('peso|cargar|almacén|fuerza').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
         st.metric("Dificultades Cargar Peso", f"{c_peso} Casos")
@@ -309,25 +310,25 @@ with tab2:
         
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="KPI 1: Índice General de Compatibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
+        st.metric(label="Índice General de Compatibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
     with col2:
         exigencia_alta = "Moderada"
         if 'Estrés por carga laboral' in df_filtrado.columns:
             porc_estres = (df_filtrado['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto').sum() / len(df_filtrado)) * 100
             if porc_estres > 40: exigencia_alta = "Alta"
             elif porc_estres < 15: exigencia_alta = "Baja"
-        st.metric(label="KPI 4: Nivel de Exigencia Promedio del Puesto", value=exigencia_alta)
+        st.metric(label="Nivel de Exigencia Promedio del Puesto", value=exigencia_alta)
     with col3:
         req_ajuste = 0
         if 'Requiere medidas de apoyo' in df_filtrado.columns:
             req_ajuste = df_filtrado['Requiere medidas de apoyo'].astype(str).str.lower().str.contains('sí|requiere').sum()
-        st.metric(label="KPI 6: Colaboradores que Requieren Ajustes", value=f"{req_ajuste} Pers.")
+        st.metric(label="Colaboradores que Requieren Ajustes", value=f"{req_ajuste} Pers.")
 
     st.markdown("---")
     col_g1, col_g2 = st.columns(2)
     
     with col_g1:
-        st.subheader("KPI 2: Cumplimiento Promedio por Dimensión Operativa")
+        st.subheader("Cumplimiento Promedio por Dimensión Operativa")
         dim_data = {
             "Dimensión": ["Autonomía", "Adaptación a Cambios", "Seguridad Laboral", "Comprensión", "Ritmo de Entrega"],
             "Cumplimiento (%)": [84.2, 79.1, 91.5, 88.0, 72.4]
@@ -339,7 +340,7 @@ with tab2:
         st.plotly_chart(fig_dims, use_container_width=True)
 
     with col_g2:
-        st.subheader("KPI 3: Distribución de Ajuste Puesto-Persona")
+        st.subheader("Distribución de Ajuste Puesto-Persona")
         ajuste_labels = ['Ajuste Óptimo', 'Requiere Monitoreo', 'Desalineado / Alerta']
         ajuste_valores = [int(len(df_filtrado)*0.7), int(len(df_filtrado)*0.2), int(len(df_filtrado)*0.1) + 1]
         fig_pie = go.Figure(data=[go.Pie(labels=ajuste_labels, values=ajuste_valores, hole=.4,
@@ -351,7 +352,7 @@ with tab2:
     col_f1, col_f2 = st.columns(2)
     
     with col_f1:
-        st.subheader("KPI 5: Principales Barreras Identificadas en Tienda")
+        st.subheader("Principales Barreras Identificadas en Tienda")
         barreras_data = {
             "Factor de Riesgo / Barrera": ["Infraestructura / Accesibilidad", "Instrucciones Complejas", "Ritmo de Carga de Trabajo", "Interacción Crítica con Clientes"],
             "Casos Reportados": [2, 5, 4, 3]
@@ -363,10 +364,10 @@ with tab2:
         st.plotly_chart(fig_barreras, use_container_width=True)
 
     with col_f2:
-        st.subheader("KPI 7: Recomendación Técnica Automatizada")
+        st.subheader("Recomendación Técnica Automatizada")
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
