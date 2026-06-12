@@ -31,7 +31,7 @@ disc_sel = st.sidebar.multiselect("Tipo de Discapacidad", options=discapacidades
 puesto_sel = st.sidebar.multiselect("Puesto Colaborador", options=puestos)
 
 st.sidebar.markdown("---")
-st.sidebar.header("🔍 Auditoría por Indicador")
+st.sidebar.header("Auditoría por Indicador")
 
 opciones_alerta = [
     "Ver todos los registros",
@@ -145,7 +145,7 @@ with tab1:
     st.header("Métricas e Indicadores de Entrevistas de Inclusión")
     
     if alerta_sel != "Ver todos los registros":
-        st.warning(f"Filtrando métricas y gráficos para el indicador: **{alerta_sel}**")
+        st.warning(f"Filtrando métricas y gráficos para el indicador: {alerta_sel}")
         
     st.markdown("---")
     
@@ -311,7 +311,7 @@ with tab2:
         exigencia_alta = "Moderada"
         if 'Estrés por carga laboral' in df_filtrado.columns:
             porc_estres = (df_filtrado['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto').sum() / len(df_filtrado)) * 100
-            if porc_estres > 40: exigencia_alta = "Alta ⚠️"
+            if porc_estres > 40: exigencia_alta = "Alta"
             elif porc_estres < 15: exigencia_alta = "Baja"
         st.metric(label="KPI 4: Nivel de Exigencia Promedio del Puesto", value=exigencia_alta)
     with col3:
@@ -363,7 +363,7 @@ with tab2:
         st.subheader("KPI 7: Recomendación Técnica Automatizada")
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
@@ -372,11 +372,11 @@ with tab3:
     st.header("Explorador y Auditoría de Datos en Tiempo Real")
     st.markdown("---")
     
-    st.subheader("🕵️ Colaboradores Específicos Identificados")
+    st.subheader("Colaboradores Específicos Identificados")
     if alerta_sel == "Ver todos los registros":
-        st.info("Utiliza el buscador de la barra lateral izquierda **'Auditoría por Indicador'** para aislar los nombres de los colaboradores que cumplen con cada métrica.")
+        st.info("Utiliza el buscador de la barra lateral izquierda 'Auditoría por Indicador' para aislar los nombres de los colaboradores que cumplen con cada métrica.")
     else:
-        st.success(f"Registros filtrados para el indicador seleccionado en la barra lateral: **{alerta_sel}**")
+        st.success(f"Registros filtrados para el indicador seleccionado en la barra lateral: {alerta_sel}")
         if mostrar_tabla_chk:
             st.metric("Total de Colaboradores", len(df_audit_chk))
             st.dataframe(df_audit_chk[['ID', 'Nombre del colaborador', 'Sede de tienda', 'Puesto colaborador', 'Ajuste puesto persona']], use_container_width=True, hide_index=True)
@@ -387,7 +387,7 @@ with tab3:
             st.dataframe(df_audit_ent[columnas_vista + col_extra], use_container_width=True, hide_index=True)
             
     st.markdown("---")
-    st.subheader("📦 Vista de Tablas de Origen Completas")
+    st.subheader("Vista de Tablas de Origen Completas")
 
     sub_tab_consolidado, sub_tab_entrevistas, sub_tab_checklist = st.tabs([
         "Datos Consolidados (Cruce)", 
