@@ -108,7 +108,7 @@ elif alerta_sel == "Apoyos Visuales (Formato Preferido = Visual)":
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual')]
 elif alerta_sel == "Apoyos Escritos (Formato Preferido = Escrito)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.strip().str.contains('escrito')]
+        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrito')]
 elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación')]
@@ -156,38 +156,45 @@ with tab1:
     
     with c1:
         v_puesto = 100.0
+        n_puesto = 0
         if 'Resignación de cambio de puesto' in df_ent_fil.columns:
             cambios = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
-            v_puesto = round(((total_ent - cambios) / total_ent) * 100, 1)
-        st.metric("% Cómodos en Puesto", f"{v_puesto}%")
+            n_puesto = total_ent - cambios
+            v_puesto = round((n_puesto / total_ent) * 100, 1)
+        st.metric("% Cómodos en Puesto", f"{v_puesto}%", f"{n_puesto} de {total_ent} colab.")
         
     with c2:
         v_sede = 90.0
+        n_sede = 0
         if 'Recomendación cambio de sede' in df_ent_fil.columns:
             cambios_s = df_ent_fil['Recomendación cambio de sede'].astype(str).str.lower().str.contains('sí|requiere').sum()
-            v_sede = round(((total_ent - cambios_s) / total_ent) * 100, 1)
-        st.metric("% Cómodos en Sede", f"{v_sede}%")
+            n_sede = total_ent - cambios_s
+            v_sede = round((n_sede / total_ent) * 100, 1)
+        st.metric("% Cómodos en Sede", f"{v_sede}%", f"{n_sede} de {total_ent} colab.")
         
     with c3:
         v_trankilidad = 80.0
+        n_trank = 0
         if 'Trabaja con tranquilidad' in df_ent_fil.columns:
-            si_trank = df_ent_fil['Trabaja con tranquilidad'].astype(str).str.lower().str.contains('sí|bueno|si').sum()
-            v_trankilidad = round((si_trank / total_ent) * 100, 1)
-        st.metric("% Trabajan Tranquilos", f"{v_trankilidad}%")
+            n_trank = df_ent_fil['Trabaja con tranquilidad'].astype(str).str.lower().str.contains('sí|bueno|si').sum()
+            v_trankilidad = round((n_trank / total_ent) * 100, 1)
+        st.metric("% Trabajan Tranquilos", f"{v_trankilidad}%", f"{n_trank} de {total_ent} colab.")
         
     with c4:
         v_estres = 20.0
+        n_estres = 0
         if 'Estrés por carga laboral' in df_ent_fil.columns:
-            si_estres = df_ent_fil['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto|si').sum()
-            v_estres = round((si_estres / total_ent) * 100, 1)
-        st.metric("% Estrés Carga Laboral", f"{v_estres}%")
+            n_estres = df_ent_fil['Estrés por carga laboral'].astype(str).str.lower().str.contains('sí|alto|si').sum()
+            v_estres = round((n_estres / total_ent) * 100, 1)
+        st.metric("% Estrés Carga Laboral", f"{v_estres}%", f"{n_estres} de {total_ent} colab.")
         
     with c5:
         v_ambiente = 0.0
+        n_ambiente = 0
         if 'Ambiente de trabajo' in df_ent_fil.columns:
-            si_tranquilo = df_ent_fil['Ambiente de trabajo'].astype(str).str.lower().str.strip().str.contains('tranquilo').sum()
-            v_ambiente = round((si_tranquilo / total_ent) * 100, 1)
-        st.metric("% Satisfechos Ambiente", f"{v_ambiente}%")
+            n_ambiente = df_ent_fil['Ambiente de trabajo'].astype(str).str.lower().str.strip().str.contains('tranquilo').sum()
+            v_ambiente = round((n_ambiente / total_ent) * 100, 1)
+        st.metric("% Satisfechos Ambiente", f"{v_ambiente}%", f"{n_ambiente} de {total_ent} colab.")
         
     st.markdown("---")
     st.subheader("Inclusión y Accesibilidad")
@@ -195,38 +202,43 @@ with tab1:
     
     with ca1:
         v_inst = 15.0
+        n_inst = 0
         if 'Requiere instrucciones adaptadas' in df_ent_fil.columns:
-            si_inst = df_ent_fil['Requiere instrucciones adaptadas'].astype(str).str.lower().str.contains('sí|si').sum()
-            v_inst = round((si_inst / total_ent) * 100, 1)
-        st.metric("% Instrucciones Adaptadas", f"{v_inst}%")
+            n_inst = df_ent_fil['Requiere instrucciones adaptadas'].astype(str).str.lower().str.contains('sí|si').sum()
+            v_inst = round((n_inst / total_ent) * 100, 1)
+        st.metric("% Instrucciones Adaptadas", f"{v_inst}%", f"{n_inst} de {total_ent} colab.")
         
     with ca2:
         v_jefe = 25.0
+        n_jefe = 0
         if 'Apoyo principal' in df_ent_fil.columns:
-            si_jefe = df_ent_fil['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor').sum()
-            v_jefe = round((si_jefe / total_ent) * 100, 1)
-        st.metric("% Requiere Apoyo Jefe", f"{v_jefe}%")
+            n_jefe = df_ent_fil['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor').sum()
+            v_jefe = round((n_jefe / total_ent) * 100, 1)
+        st.metric("% Requiere Apoyo Jefe", f"{v_jefe}%", f"{n_jefe} de {total_ent} colab.")
         
     with ca3:
         v_vis = 30.0
+        n_vis = 0
         if 'Formato Preferido de apoyo' in df_ent_fil.columns:
-            si_vis = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual').sum()
-            v_vis = round((si_vis / total_ent) * 100, 1)
-        st.metric("% Apoyos Visuales", f"{v_vis}%")
+            n_vis = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual').sum()
+            v_vis = round((n_vis / total_ent) * 100, 1)
+        st.metric("% Apoyos Visuales", f"{v_vis}%", f"{n_vis} de {total_ent} colab.")
         
     with ca4:
         v_escr = 0.0
+        n_escr = 0
         if 'Formato Preferido de apoyo' in df_ent_fil.columns:
-            si_escr = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.strip().str.contains('escrito').sum()
-            v_escr = round((si_escr / total_ent) * 100, 1)
-        st.metric("% Apoyos Escritos", f"{v_escr}%")
+            n_escr = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrito').sum()
+            v_escr = round((n_escr / total_ent) * 100, 1)
+        st.metric("% Apoyos Escritos", f"{v_escr}%", f"{n_escr} de {total_ent} colab.")
         
     with ca5:
         v_verb = 45.0
+        n_verb = 0
         if 'Formato Preferido de apoyo' in df_ent_fil.columns:
-            si_verb = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación').sum()
-            v_verb = round((si_verb / total_ent) * 100, 1)
-        st.metric("% Apoyos Verbales", f"{v_verb}%")
+            n_verb = df_ent_fil['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación').sum()
+            v_verb = round((n_verb / total_ent) * 100, 1)
+        st.metric("% Apoyos Verbales", f"{v_verb}%", f"{n_verb} de {total_ent} colab.")
 
     st.markdown("---")
     g_col1, g_col2 = st.columns(2)
