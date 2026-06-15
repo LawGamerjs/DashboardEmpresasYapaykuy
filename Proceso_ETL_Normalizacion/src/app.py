@@ -35,6 +35,9 @@ st.sidebar.header("Auditoría por Indicador")
 
 opciones_alerta = [
     "Ver todos los registros",
+    "Jóvenes (Menores de 30 años)",
+    "Adultos (30 a 50 años)",
+    "Adultos Mayores (Mayores de 50 años)",
     "Cómodos en Puesto (Resignación de cambio de puesto = No)",
     "Cómodos en Sede (Recomendación cambio de sede = No)",
     "Trabajan Tranquilos (Trabaja con tranquilidad = Sí)",
@@ -82,7 +85,20 @@ df_audit_ent = df_ent_fil.copy()
 df_audit_chk = df_chk_fil.copy()
 mostrar_tabla_chk = False
 
-if alerta_sel == "Cómodos en Puesto (Resignación de cambio de puesto = No)":
+if 'Edad' in df_audit_ent.columns:
+    df_audit_ent['Edad_Num'] = pd.to_numeric(df_audit_ent['Edad'], errors='coerce')
+    df_ent_fil['Edad_Num'] = pd.to_numeric(df_ent_fil['Edad'], errors='coerce')
+
+if alerta_sel == "Jóvenes (Menores de 30 años)":
+    if 'Edad_Num' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Edad_Num'] < 30]
+elif alerta_sel == "Adultos (30 a 50 años)":
+    if 'Edad_Num' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[(df_audit_ent['Edad_Num'] >= 30) & (df_audit_ent['Edad_Num'] <= 50)]
+elif alerta_sel == "Adultos Mayores (Mayores de 50 años)":
+    if 'Edad_Num' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Edad_Num'] > 50]
+elif alerta_sel == "Cómodos en Puesto (Resignación de cambio de puesto = No)":
     if 'Resignación de cambio de puesto' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[~df_audit_ent['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
 elif alerta_sel == "Cómodos en Sede (Recomendación cambio de sede = No)":
@@ -154,6 +170,26 @@ with tab1:
     st.metric(label="Cantidad Global de Colaboradores Evaluados", value=f"{total_ent} Colaboradores")
     st.markdown("---")
     
+    col_etaria_1, col_etaria_2 = st.columns([2, 3])
+    with col_etaria_1:
+        st.subheader("Distribución por Rango Etario")
+        if 'Edad_Num' in df_ent_fil.columns:
+            n_jovenes = df_ent_fil[df_ent_fil['Edad_Num'] < 30].shape[0]
+            n_adultos = df_ent_fil[(df_ent_fil['Edad_Num'] >= 30) & (df_ent_fil['Edad_Num'] <= 50)].shape[0]
+            n_mayores = df_ent_fil[df_ent_fil['Edad_Num'] > 50].shape[0]
+        else:
+            n_jovenes, n_adultos, n_mayores = 0, 0, 0
+            
+        df_rangos = pd.DataFrame({
+            "Rango Etario": ["Jóvenes (<30)", "Adultos (30-50)", "Adultos Mayores (>50)"],
+            "Colaboradores": [n_jovenes, n_adultos, n_mayores]
+        })
+        fig_edad = px.bar(df_rangos, x="Colaboradores", y="Rango Etario", orientation='h', color="Rango Etario",
+                          color_discrete_sequence=px.colors.qualitative.Pastel, text_auto=True)
+        fig_edad.update_layout(height=200, margin=dict(l=10, r=10, t=10, b=10), showlegend=False)
+        st.plotly_chart(fig_edad, use_container_width=True)
+        
+    st.markdown("---")
     st.subheader("Bienestar Laboral")
     c1, c2, c3, c4, c5 = st.columns(5)
     
@@ -309,7 +345,7 @@ with tab2:
         
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="Índice General de Compatibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
+        st.metric(label="Índice General de Compartibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
     with col2:
         exigencia_alta = "Moderada"
         if 'Estrés por carga laboral' in df_filtrado.columns:
@@ -366,7 +402,7 @@ with tab2:
         st.subheader("Recomendación Técnica Automatizada")
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
@@ -385,7 +421,7 @@ with tab3:
             st.dataframe(df_audit_chk[['ID', 'Nombre del colaborador', 'Sede de tienda', 'Puesto colaborador', 'Ajuste puesto persona']], use_container_width=True, hide_index=True)
         else:
             st.metric("Total de Colaboradores", len(df_audit_ent))
-            columnas_vista = ['ID', 'Nombre del colaborador', 'Sede de tienda', 'Puesto colaborador']
+            columnas_vista = ['ID', 'Nombre del colaborador', 'Edad', 'Sede de tienda', 'Puesto colaborador']
             col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', 'Presencia Bulling', 'Presencia conflictos', 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
             st.dataframe(df_audit_ent[columnas_vista + col_extra], use_container_width=True, hide_index=True)
             
