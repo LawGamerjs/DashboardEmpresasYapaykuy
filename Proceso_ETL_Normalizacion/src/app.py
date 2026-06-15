@@ -425,7 +425,8 @@ with tab2:
             "Factor de Riesgo / Barrera": ["Infraestructura / Accesibilidad", "Instrucciones Complejas", "Ritmo de Carga de Trabajo", "Interacción Crítica con Clientes"],
             "Casos Reportados": [2, 5, 4, 3]
         }
-        df_barreras = px.bar(df_barreras, x="Casos Reportados", y="Factor de Riesgo / Barrera", 
+        df_barreras_data = pd.DataFrame(barreras_data)
+        fig_barreras = px.bar(df_barreras_data, x="Casos Reportados", y="Factor de Riesgo / Barrera", 
                              color="Casos Reportados", color_continuous_scale="Reds")
         fig_barreras.update_layout(height=280, margin=dict(l=20, r=20, t=30, b=20))
         st.plotly_chart(fig_barreras, use_container_width=True)
