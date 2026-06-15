@@ -49,7 +49,7 @@ opciones_alerta = [
     "Apoyos Escritos (Formato Preferido = Escrita)",
     "Apoyos Verbales (Formato Preferido = Verbal)",
     "Problemas Clientes (Retos con clientes)",
-    "Bullying / Discriminación (Presencia Bulling)",
+    "Bullying / Discriminación (Presencia Bullying)",
     "Conflictos Compañeros (Presencia conflictos)",
     "Riesgo de Salida Activo",
     "Resignación de Puesto Activa",
@@ -84,6 +84,9 @@ if puesto_sel:
 df_audit_ent = df_ent_fil.copy()
 df_audit_chk = df_chk_fil.copy()
 mostrar_tabla_chk = False
+
+col_bull_name = next((c for c in df_audit_ent.columns if 'bull' in c.lower()), None)
+col_conf_name = next((c for c in df_audit_ent.columns if 'conflict' in c.lower()), None)
 
 if 'Edad' in df_audit_ent.columns:
     df_audit_ent['Edad_Num'] = pd.to_numeric(df_audit_ent['Edad'], errors='coerce')
@@ -131,12 +134,12 @@ elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
 elif alerta_sel == "Problemas Clientes (Retos con clientes)":
     if 'Retos en la relación con clientes' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja')]
-elif alerta_sel == "Bullying / Discriminación (Presencia Bulling)":
-    if 'Presencia Bulling' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
+elif alerta_sel == "Bullying / Discriminación (Presencia Bullying)":
+    if col_bull_name:
+        df_audit_ent = df_audit_ent[df_audit_ent[col_bull_name].astype(str).str.lower().str.contains('sí|si')]
 elif alerta_sel == "Conflictos Compañeros (Presencia conflictos)":
-    if 'Presencia conflictos' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
+    if col_conf_name:
+        df_audit_ent = df_audit_ent[df_audit_ent[col_conf_name].astype(str).str.lower().str.contains('sí|si')]
 elif alerta_sel == "Riesgo de Salida Activo":
     if 'Riesgo de salida de la empresa' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado')]
@@ -264,9 +267,9 @@ with tab1:
     
     with g_col1:
         st.subheader("Riesgos Psicosociales")
-        c_bullying = df_ent_fil['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Presencia Bulling' in df_ent_fil.columns else 0
+        c_bullying = df_ent_fil[col_bull_name].astype(str).str.lower().str.contains('sí|si').sum() if col_bull_name else 0
         c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
-        c_conf = df_ent_fil['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Presencia conflictos' in df_ent_fil.columns else 0
+        c_conf = df_ent_fil[col_conf_name].astype(str).str.lower().str.contains('sí|si').sum() if col_conf_name else 0
         c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja').sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
         
         df_psico = pd.DataFrame({
@@ -420,7 +423,7 @@ with tab3:
         else:
             st.metric("Total de Colaboradores", len(df_audit_ent))
             columnas_vista = ['ID', 'Nombre del colaborador', 'Edad', 'Sede de tienda', 'Puesto colaborador']
-            col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', 'Presencia Bulling', 'Presencia conflictos', 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
+            col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', col_bull_name, col_conf_name, 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
             st.dataframe(df_audit_ent[columnas_vista + col_extra], use_container_width=True, hide_index=True)
             
     st.markdown("---")
