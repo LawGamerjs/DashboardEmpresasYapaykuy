@@ -155,9 +155,8 @@ elif alerta_sel == "Ajustes Ergonómicos (Control de Ruido)":
     if 'Mejora solicitada' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido')]
 elif alerta_sel == "Restricciones Físicas":
-    if 'Actividad más difícil' in df_audit_ent.columns:
-        ser_act = df_audit_ent['Actividad más difícil'].astype(str).str.lower().str.strip()
-        df_audit_ent = df_audit_ent[~ser_act.isin(['no proporciona', 'nada', '', 'nan', 'none'])]
+    if 'Restricciones Físicas' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Restricciones Físicas'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
 elif alerta_sel == "Checklist: Compatibilidad Alta (Ajuste puesto persona)":
     if 'Ajuste puesto persona' in df_audit_chk.columns:
         df_audit_chk = df_audit_chk[df_audit_chk['Ajuste puesto persona'].astype(str).str.lower().str.strip().str.contains('alto')]
@@ -349,9 +348,8 @@ with tab1:
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
         c_rest = 0
-        if 'Actividad más difícil' in df_ent_fil.columns:
-            ser_act = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.strip()
-            c_rest = len(df_ent_fil) - ser_act.isin(['no proporciona', 'nada', '', 'nan', 'none']).sum()
+        if 'Restricciones Físicas' in df_ent_fil.columns:
+            c_rest = df_ent_fil['Restricciones Físicas'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
         st.metric("Restricciones Físicas", f"{c_rest} Casos")
     with cb3:
         c_peso = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('peso|cargar|almacén|fuerza').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
@@ -459,7 +457,7 @@ with tab3:
         else:
             st.metric("Total de Colaboradores", len(df_audit_ent))
             columnas_vista = ['ID', 'Nombre del colaborador', 'Edad', 'Sede de tienda', 'Puesto colaborador']
-            col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', col_bull_name, col_conf_name, 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
+            col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', 'Restricciones Físicas', col_bull_name, col_conf_name, 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
             st.dataframe(df_audit_ent[columnas_vista + col_extra], use_container_width=True, hide_index=True)
             
     st.markdown("---")
@@ -496,7 +494,7 @@ with tab3:
         st.metric(label="Total Filas en Entrevistas", value=len(df_display_ent))
         st.dataframe(df_display_ent, use_container_width=True, hide_index=True)
 
-    with sub_tab_checklist:
+    with sub_tab_checklist = sub_tab_checklist:
         st.subheader("Registros Originales de la pestaña: 'Checklist de puesto'")
         search_chk = st.text_input("Filtrar registros en Checklist:", key="search_chk")
         df_display_chk = df_chk_fil.copy()
