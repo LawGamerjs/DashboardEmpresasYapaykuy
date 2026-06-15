@@ -44,11 +44,11 @@ opciones_alerta = [
     "Estrés Carga Laboral (Estrés por carga laboral = Sí)",
     "Satisfechos con el Ambiente (Entorno Tranquilo)",
     "Instrucciones Adaptadas (Requiere instrucciones adaptadas = Sí)",
-    "Requiere Apoyo Jefe (Apoyo principal = Jefe)",
+    "Referencia de apoyo laboral",
     "Apoyos Visuales (Formato Preferido = Visual)",
     "Apoyos Escritos (Formato Preferido = Escrita)",
     "Apoyos Verbales (Formato Preferido = Verbal)",
-    "Problemas Clientes (Retos con clientes)",
+    "Desafíos en la Atención al Cliente",
     "Bullying / Discriminación (Presencia Bullying)",
     "Conflictos Compañeros (Presencia conflictos)",
     "Riesgo de Salida Activo",
@@ -119,9 +119,9 @@ elif alerta_sel == "Satisfechos con el Ambiente (Entorno Tranquilo)":
 elif alerta_sel == "Instrucciones Adaptadas (Requiere instrucciones adaptadas = Sí)":
     if 'Requiere instrucciones adaptadas' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Requiere instrucciones adaptadas'].astype(str).str.lower().str.contains('sí|si')]
-elif alerta_sel == "Requiere Apoyo Jefe (Apoyo principal = Jefe)":
+elif alerta_sel == "Referencia de apoyo laboral":
     if 'Apoyo principal' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor')]
+        df_audit_ent = df_audit_ent[df_audit_ent['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor|compañero|companero|ambos')]
 elif alerta_sel == "Apoyos Visuales (Formato Preferido = Visual)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual')]
@@ -131,7 +131,7 @@ elif alerta_sel == "Apoyos Escritos (Formato Preferido = Escrita)":
 elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación')]
-elif alerta_sel == "Problemas Clientes (Retos con clientes)":
+elif alerta_sel == "Desafíos en la Atención al Cliente":
     if 'Retos en la relación con clientes' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja')]
 elif alerta_sel == "Bullying / Discriminación (Presencia Bullying)":
@@ -231,12 +231,12 @@ with tab1:
         st.metric("% Instrucciones Adaptadas", f"{v_inst}%", f"{n_inst} de {total_ent} colab.")
         
     with ca2:
-        v_jefe = 25.0
+        v_jefe = 0.0
         n_jefe = 0
         if 'Apoyo principal' in df_ent_fil.columns:
-            n_jefe = df_ent_fil['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor').sum()
+            n_jefe = df_ent_fil['Apoyo principal'].astype(str).str.lower().str.contains('jefe|gerente|supervisor|compañero|companero|ambos').sum()
             v_jefe = round((n_jefe / total_ent) * 100, 1)
-        st.metric("% Requiere Apoyo Jefe", f"{v_jefe}%", f"{n_jefe} de {total_ent} colab.")
+        st.metric("% Referencia de apoyo laboral", f"{v_jefe}%", f"{n_jefe} de {total_ent} colab.")
         
     with ca3:
         v_vis = 30.0
@@ -268,12 +268,12 @@ with tab1:
     with g_col1:
         st.subheader("Riesgos Psicosociales")
         c_bullying = df_ent_fil[col_bull_name].astype(str).str.lower().str.contains('sí|si').sum() if col_bull_name else 0
-        c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
+        c_comun = df_ent_fil['Communication Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
         c_conf = df_ent_fil[col_conf_name].astype(str).str.lower().str.contains('sí|si').sum() if col_conf_name else 0
         c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja').sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
         
         df_psico = pd.DataFrame({
-            "Riesgo Psicosocial": ["Bullying / Disc.", "Dif. Comunicación", "Conflictos Comp.", "Problemas Clientes"],
+            "Riesgo Psicosocial": ["Bullying / Disc.", "Dif. Comunicación", "Conflictos Comp.", "Desafíos Atención Cliente"],
             "Casos": [int(c_bullying), int(c_comun), int(c_conf), int(c_cli)]
         })
         fig_psico = px.bar(df_psico, x="Casos", y="Riesgo Psicosocial", orientation='h', color="Casos", color_continuous_scale="Oranges", text_auto=True)
@@ -308,8 +308,32 @@ with tab1:
         })
         fig_edad = px.bar(df_rangos, x="Colaboradores", y="Rango Etario", orientation='h', color="Colaboradores",
                           color_continuous_scale="Purples", text_auto=True)
-        fig_edad.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
+        fig_edad.update_layout(height=130, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
         st.plotly_chart(fig_edad, use_container_width=True)
+
+        st.subheader("Indicaciones Claras")
+        if 'Las indicaciones de su trabajo son claras' in df_ent_fil.columns:
+            ser_indicaciones = df_ent_fil['Las indicaciones de su trabajo son claras'].astype(str).str.strip()
+            
+            c_si = ser_indicaciones.str.lower().isin(['sí', 'si']).sum()
+            c_mod = ser_indicaciones.str.lower().isin(['moderada', 'moderado']).sum()
+            c_par = ser_indicaciones.str.lower().isin(['parcial']).sum()
+            c_baj = ser_indicaciones.str.lower().isin(['baja', 'bajo']).sum()
+            c_no_prop = ser_indicaciones.str.lower().isin(['no proporciona', 'no responde', 'n/a']).sum()
+            
+            total_reconocido = c_si + c_mod + c_par + c_baj + c_no_prop
+            c_no_prop += (len(df_ent_fil) - total_reconocido)
+        else:
+            c_si, c_mod, c_par, c_baj, c_no_prop = 0, 0, 0, 0, len(df_ent_fil)
+
+        df_ind_data = pd.DataFrame({
+            "Métrica": ["Sí", "Moderada", "Parcial", "Baja", "No proporciona"],
+            "Cantidad": [int(c_si), int(c_mod), int(c_par), int(c_baj), int(c_no_prop)]
+        })
+        fig_ind = px.bar(df_ind_data, x="Cantidad", y="Métrica", orientation='h', color="Cantidad",
+                         color_continuous_scale="Teal", text_auto=True)
+        fig_ind.update_layout(height=130, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
+        st.plotly_chart(fig_ind, use_container_width=True)
 
     st.markdown("---")
     st.subheader("Adaptaciones del Puesto (Frecuencia de Requerimientos)")
