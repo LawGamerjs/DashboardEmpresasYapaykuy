@@ -289,7 +289,7 @@ with tab1:
             "Indicador": ["Riesgo de Salida", "Resignación Puesto"],
             "Casos Activos": [int(c_salida_si), int(c_resignacion_si)]
         })
-        fig_salida = px.bar(df_salida_kpis, x="Cases Activos", y="Indicador", orientation='h', color="Casos Activos", color_continuous_scale="Reds", text_auto=True)
+        fig_salida = px.bar(df_salida_kpis, x="Casos Activos", y="Indicador", orientation='h', color="Casos Activos", color_continuous_scale="Reds", text_auto=True)
         fig_salida.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
         st.plotly_chart(fig_salida, use_container_width=True)
 
