@@ -170,26 +170,6 @@ with tab1:
     st.metric(label="Cantidad Global de Colaboradores Evaluados", value=f"{total_ent} Colaboradores")
     st.markdown("---")
     
-    col_etaria_1, col_etaria_2 = st.columns([2, 3])
-    with col_etaria_1:
-        st.subheader("Distribución por Rango Etario")
-        if 'Edad_Num' in df_ent_fil.columns:
-            n_jovenes = df_ent_fil[df_ent_fil['Edad_Num'] < 30].shape[0]
-            n_adultos = df_ent_fil[(df_ent_fil['Edad_Num'] >= 30) & (df_ent_fil['Edad_Num'] <= 50)].shape[0]
-            n_mayores = df_ent_fil[df_ent_fil['Edad_Num'] > 50].shape[0]
-        else:
-            n_jovenes, n_adultos, n_mayores = 0, 0, 0
-            
-        df_rangos = pd.DataFrame({
-            "Rango Etario": ["Jóvenes (<30)", "Adultos (30-50)", "Adultos Mayores (>50)"],
-            "Colaboradores": [n_jovenes, n_adultos, n_mayores]
-        })
-        fig_edad = px.bar(df_rangos, x="Colaboradores", y="Rango Etario", orientation='h', color="Rango Etario",
-                          color_discrete_sequence=px.colors.qualitative.Pastel, text_auto=True)
-        fig_edad.update_layout(height=200, margin=dict(l=10, r=10, t=10, b=10), showlegend=False)
-        st.plotly_chart(fig_edad, use_container_width=True)
-        
-    st.markdown("---")
     st.subheader("Bienestar Laboral")
     c1, c2, c3, c4, c5 = st.columns(5)
     
@@ -280,35 +260,53 @@ with tab1:
         st.metric("% Apoyos Verbales", f"{v_verb}%", f"{n_verb} de {total_ent} colab.")
 
     st.markdown("---")
-    g_col1, g_col2 = st.columns(2)
+    g_col1, g_col2, g_col3 = st.columns(3)
     
     with g_col1:
-        st.subheader("Riesgos Psicosociales (Casos Detectados)")
+        st.subheader("Riesgos Psicosociales")
         c_bullying = df_ent_fil['Presencia Bulling'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Presencia Bulling' in df_ent_fil.columns else 0
         c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
         c_conf = df_ent_fil['Presencia conflictos'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Presencia conflictos' in df_ent_fil.columns else 0
         c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja').sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
         
         df_psico = pd.DataFrame({
-            "Riesgo Psicosocial": ["Bullying / Discriminación", "Dificultades Comunicación", "Conflictos Compañeros", "Problemas Clientes"],
+            "Riesgo Psicosocial": ["Bullying / Disc.", "Dif. Comunicación", "Conflictos Comp.", "Problemas Clientes"],
             "Casos": [int(c_bullying), int(c_comun), int(c_conf), int(c_cli)]
         })
         fig_psico = px.bar(df_psico, x="Casos", y="Riesgo Psicosocial", orientation='h', color="Casos", color_continuous_scale="Oranges", text_auto=True)
-        fig_psico.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10))
+        fig_psico.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
         st.plotly_chart(fig_psico, use_container_width=True)
         
     with g_col2:
-        st.subheader("Riesgo de Salida y Solicitudes de Cambio")
+        st.subheader("Riesgo de Salida y Cambios")
         c_salida_si = df_ent_fil['Riesgo de salida de la empresa'].astype(str).str.lower().str.contains('sí|si|alto|moderado').sum() if 'Riesgo de salida de la empresa' in df_ent_fil.columns else 0
         c_resignacion_si = df_ent_fil['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Resignación de cambio de puesto' in df_ent_fil.columns else 0
 
         df_salida_kpis = pd.DataFrame({
-            "Indicador": ["En Riesgo de Salida", "Resignación de Puesto"],
+            "Indicador": ["Riesgo de Salida", "Resignación Puesto"],
             "Casos Activos": [int(c_salida_si), int(c_resignacion_si)]
         })
         fig_salida = px.bar(df_salida_kpis, x="Casos Activos", y="Indicador", orientation='h', color="Casos Activos", color_continuous_scale="Reds", text_auto=True)
-        fig_salida.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10))
+        fig_salida.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
         st.plotly_chart(fig_salida, use_container_width=True)
+
+    with g_col3:
+        st.subheader("Distribución por Rango Etario")
+        if 'Edad_Num' in df_ent_fil.columns:
+            n_jovenes = df_ent_fil[df_ent_fil['Edad_Num'] < 30].shape[0]
+            n_adultos = df_ent_fil[(df_ent_fil['Edad_Num'] >= 30) & (df_ent_fil['Edad_Num'] <= 50)].shape[0]
+            n_mayores = df_ent_fil[df_ent_fil['Edad_Num'] > 50].shape[0]
+        else:
+            n_jovenes, n_adultos, n_mayores = 0, 0, 0
+            
+        df_rangos = pd.DataFrame({
+            "Rango Etario": ["Jóvenes (<30)", "Adultos (30-50)", "Adultos May. (>50)"],
+            "Colaboradores": [n_jovenes, n_adultos, n_mayores]
+        })
+        fig_edad = px.bar(df_rangos, x="Colaboradores", y="Rango Etario", orientation='h', color="Colaboradores",
+                          color_continuous_scale="Purples", text_auto=True)
+        fig_edad.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
+        st.plotly_chart(fig_edad, use_container_width=True)
 
     st.markdown("---")
     st.subheader("Adaptaciones del Puesto (Frecuencia de Requerimientos)")
@@ -345,7 +343,7 @@ with tab2:
         
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric(label="Índice General de Compartibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
+        st.metric(label="Índice General de Compatibilidad Puesto-Persona", value=f"{compatibilidad_gen}%")
     with col2:
         exigencia_alta = "Moderada"
         if 'Estrés por carga laboral' in df_filtrado.columns:
