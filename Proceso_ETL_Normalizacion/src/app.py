@@ -494,7 +494,7 @@ with tab3:
         st.metric(label="Total Filas en Entrevistas", value=len(df_display_ent))
         st.dataframe(df_display_ent, use_container_width=True, hide_index=True)
 
-    with sub_tab_checklist = sub_tab_checklist:
+    with sub_tab_checklist:
         st.subheader("Registros Originales de la pestaña: 'Checklist de puesto'")
         search_chk = st.text_input("Filtrar registros en Checklist:", key="search_chk")
         df_display_chk = df_chk_fil.copy()
