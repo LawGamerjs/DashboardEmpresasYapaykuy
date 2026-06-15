@@ -268,7 +268,7 @@ with tab1:
     with g_col1:
         st.subheader("Riesgos Psicosociales")
         c_bullying = df_ent_fil[col_bull_name].astype(str).str.lower().str.contains('sí|si').sum() if col_bull_name else 0
-        c_comun = df_ent_fil['Communication Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
+        c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
         c_conf = df_ent_fil[col_conf_name].astype(str).str.lower().str.contains('sí|si').sum() if col_conf_name else 0
         c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja').sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
         
@@ -289,7 +289,7 @@ with tab1:
             "Indicador": ["Riesgo de Salida", "Resignación Puesto"],
             "Casos Activos": [int(c_salida_si), int(c_resignacion_si)]
         })
-        fig_salida = px.bar(df_salida_kpis, x="Casos Activos", y="Indicador", orientation='h', color="Casos Activos", color_continuous_scale="Reds", text_auto=True)
+        fig_salida = px.bar(df_salida_kpis, x="Cases Activos", y="Indicador", orientation='h', color="Casos Activos", color_continuous_scale="Reds", text_auto=True)
         fig_salida.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10), coloraxis_showscale=False)
         st.plotly_chart(fig_salida, use_container_width=True)
 
@@ -427,7 +427,7 @@ with tab2:
         st.subheader("Recomendación Técnica Automatizada")
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
