@@ -55,6 +55,7 @@ opciones_alerta = [
     "Resignación de Puesto Activa",
     "Ajustes Ergonómicos (Control de Ruido)",
     "Especificos de Accesibilidad (Mejora solicitada)",
+    "Restricciones Físicas",
     "Checklist: Compatibilidad Alta (Ajuste puesto persona)"
 ]
 
@@ -133,7 +134,7 @@ elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación')]
 elif alerta_sel == "Desafíos en la Atención al Cliente":
     if 'Retos en la relación con clientes' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja')]
+        df_audit_ent = df_audit_ent[df_audit_ent['Retos en la relación con clientes'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
 elif alerta_sel == "Bullying / Discriminación (Presencia Bullying)":
     if col_bull_name:
         df_audit_ent = df_audit_ent[df_audit_ent[col_bull_name].astype(str).str.lower().str.contains('sí|si')]
@@ -153,6 +154,10 @@ elif alerta_sel == "Especificos de Accesibilidad (Mejora solicitada)":
 elif alerta_sel == "Ajustes Ergonómicos (Control de Ruido)":
     if 'Mejora solicitada' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido')]
+elif alerta_sel == "Restricciones Físicas":
+    if 'Actividad más difícil' in df_audit_ent.columns:
+        ser_act = df_audit_ent['Actividad más difícil'].astype(str).str.lower().str.strip()
+        df_audit_ent = df_audit_ent[~ser_act.isin(['no proporciona', 'nada', '', 'nan', 'none'])]
 elif alerta_sel == "Checklist: Compatibilidad Alta (Ajuste puesto persona)":
     if 'Ajuste puesto persona' in df_audit_chk.columns:
         df_audit_chk = df_audit_chk[df_audit_chk['Ajuste puesto persona'].astype(str).str.lower().str.strip().str.contains('alto')]
@@ -270,7 +275,7 @@ with tab1:
         c_bullying = df_ent_fil[col_bull_name].astype(str).str.lower().str.contains('sí|si').sum() if col_bull_name else 0
         c_comun = df_ent_fil['Comunicación Compañeros'].astype(str).str.lower().str.contains('malo|dificultad|regular').sum() if 'Comunicación Compañeros' in df_ent_fil.columns else 0
         c_conf = df_ent_fil[col_conf_name].astype(str).str.lower().str.contains('sí|si').sum() if col_conf_name else 0
-        c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.contains('sí|si|dificultad|queja').sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
+        c_cli = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
         
         df_psico = pd.DataFrame({
             "Riesgo Psicosocial": ["Bullying / Disc.", "Dif. Comunicación", "Conflictos Comp.", "Desafíos Atención Cliente"],
@@ -343,7 +348,10 @@ with tab1:
         c_erg = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido').sum() if 'Mejora solicitada' in df_ent_fil.columns else 0
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
-        c_rest = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('física|movimiento|desplazar').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
+        c_rest = 0
+        if 'Actividad más difícil' in df_ent_fil.columns:
+            ser_act = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.strip()
+            c_rest = len(df_ent_fil) - ser_act.isin(['no proporciona', 'nada', '', 'nan', 'none']).sum()
         st.metric("Restricciones Físicas", f"{c_rest} Casos")
     with cb3:
         c_peso = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('peso|cargar|almacén|fuerza').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
@@ -417,17 +425,20 @@ with tab2:
             "Factor de Riesgo / Barrera": ["Infraestructura / Accesibilidad", "Instrucciones Complejas", "Ritmo de Carga de Trabajo", "Interacción Crítica con Clientes"],
             "Casos Reportados": [2, 5, 4, 3]
         }
-        df_barreras = pd.DataFrame(barreras_data)
-        fig_barreras = px.bar(df_barreras, x="Casos Reportados", y="Factor de Riesgo / Barrera", 
+        df_barreras = px.bar(df_barreras, x="Casos Reportados", y="Factor de Riesgo / Barrera", 
                              color="Casos Reportados", color_continuous_scale="Reds")
         fig_barreras.update_layout(height=280, margin=dict(l=20, r=20, t=30, b=20))
         st.plotly_chart(fig_barreras, use_container_width=True)
 
     with col_f2:
         st.subheader("Recomendación Técnica Automatizada")
+        
+        c_retos_clientes = df_ent_fil['Retos en la relación con clientes'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Retos en la relación con clientes' in df_ent_fil.columns else 0
+        porc_friccion_clientes = round((c_retos_clientes / total_ent) * 100, 1)
+        
         st.info(
             "**Dictamen de Inclusión Operativa:**\n\n"
-            f"1. **Monitoreo de Carga:** El {round(100 - compatibilidad_gen, 1)}% de las frictions encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
+            f"1. **Monitoreo de Carga:** El {porc_friccion_clientes}% de las fricciones encontradas se concentran en los picos de atención al cliente. Se sugiere revisar asignaciones en horas de alta rotación.\n"
             "2. **Soportes Visuales:** Un alto porcentaje prefiere formatos estructurados. Se recomienda estandarizar guías visuales impresas en las estaciones de Bazar y Textiles.\n"
             "3. **Rotación Preventiva:** Mantener esquemas de pausas activas para los puestos con alta demanda de permanencia de pie."
         )
