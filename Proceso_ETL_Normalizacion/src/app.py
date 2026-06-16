@@ -153,7 +153,15 @@ elif alerta_sel == "Especificos de Accesibilidad (Mejora solicitada)":
         df_audit_ent = df_audit_ent[textos_m.str.startswith('intérprete') | textos_m.str.startswith('interprete') | (textos_m == 'que tenga un distintivo de sordo')]
 elif alerta_sel == "Ajustes Ergonómicos (Control de Ruido)":
     if 'Mejora solicitada' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido')]
+        textos_e = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
+        df_audit_ent = df_audit_ent[
+            textos_e.str.startswith('control de ruido') | 
+            textos_e.str.startswith('intérprete y flexibilidad horaria') | 
+            textos_e.str.startswith('mejorar el orden') | 
+            textos_e.str.startswith('faja transportadora') | 
+            textos_e.str.startswith('más equipos de trabajo') | 
+            textos_e.str.startswith('mejor orden en estación')
+        ]
 elif alerta_sel == "Restricciones Físicas":
     if 'Restricciones Físicas' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Restricciones Físicas'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
@@ -344,7 +352,17 @@ with tab1:
     cb1, cb2, cb3, cb4 = st.columns(4)
     
     with cb1:
-        c_erg = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip().str.startswith('control de ruido').sum() if 'Mejora solicitada' in df_ent_fil.columns else 0
+        c_erg = 0
+        if 'Mejora solicitada' in df_ent_fil.columns:
+            textos_e = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip()
+            c_erg = (
+                textos_e.str.startswith('control de ruido') | 
+                textos_e.str.startswith('intérprete y flexibilidad horaria') | 
+                textos_e.str.startswith('mejorar el orden') | 
+                textos_e.str.startswith('faja transportadora') | 
+                textos_e.str.startswith('más equipos de trabajo') | 
+                textos_e.str.startswith('mejor orden en estación')
+            ).sum()
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
         c_rest = 0
