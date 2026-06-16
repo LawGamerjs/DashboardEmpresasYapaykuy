@@ -156,7 +156,6 @@ elif alerta_sel == "Ajustes Ergonómicos (Control de Ruido)":
         textos_e = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
         df_audit_ent = df_audit_ent[
             textos_e.str.startswith('control de ruido') | 
-            textos_e.str.startswith('intérprete y flexibilidad horaria') | 
             textos_e.str.startswith('mejorar el orden') | 
             textos_e.str.startswith('faja transportadora') | 
             textos_e.str.startswith('más equipos de trabajo') | 
@@ -357,7 +356,6 @@ with tab1:
             textos_e = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip()
             c_erg = (
                 textos_e.str.startswith('control de ruido') | 
-                textos_e.str.startswith('intérprete y flexibilidad horaria') | 
                 textos_e.str.startswith('mejorar el orden') | 
                 textos_e.str.startswith('faja transportadora') | 
                 textos_e.str.startswith('más equipos de trabajo') | 
