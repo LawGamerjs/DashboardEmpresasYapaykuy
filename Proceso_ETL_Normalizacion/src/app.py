@@ -54,7 +54,7 @@ opciones_alerta = [
     "Riesgo de Salida Activo",
     "Resignación de Puesto Activa",
     "Ajustes Ergonómicos",
-    "Especificos de Accesibilidad (Mejora solicitada)",
+    "Especificos de Accesibilidad",
     "Restricciones Físicas",
     "Checklist: Compatibilidad Alta (Ajuste puesto persona)"
 ]
@@ -147,25 +147,12 @@ elif alerta_sel == "Riesgo de Salida Activo":
 elif alerta_sel == "Resignación de Puesto Activa":
     if 'Resignación de cambio de puesto' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Resignación de cambio de puesto'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
-elif alerta_sel == "Especificos de Accesibilidad (Mejora solicitada)":
-    if 'Mejora solicitada' in df_audit_ent.columns:
-        textos_m = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
-        df_audit_ent = df_audit_ent[
-            textos_m.str.startswith('intérprete') | 
-            textos_m.str.startswith('interprete') | 
-            (textos_m == 'que tenga un distintivo de sordo') |
-            textos_m.str.contains('macrotipo')
-        ]
+elif alerta_sel == "Especificos de Accesibilidad":
+    if 'Accesibilidad' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Accesibilidad'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
 elif alerta_sel == "Ajustes Ergonómicos":
-    if 'Mejora solicitada' in df_audit_ent.columns:
-        textos_e = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
-        df_audit_ent = df_audit_ent[
-            textos_e.str.startswith('control de ruido') | 
-            textos_e.str.startswith('mejorar el orden') | 
-            textos_e.str.startswith('faja transportadora') | 
-            textos_e.str.startswith('más equipos de trabajo') | 
-            textos_e.str.startswith('mejor orden en estación')
-        ]
+    if 'Ajustes ergonomicos' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Ajustes ergonomicos'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
 elif alerta_sel == "Restricciones Físicas":
     if 'Restricciones Físicas' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Restricciones Físicas'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
@@ -356,35 +343,16 @@ with tab1:
     cb1, cb2, cb3, cb4 = st.columns(4)
     
     with cb1:
-        c_erg = 0
-        if 'Mejora solicitada' in df_ent_fil.columns:
-            textos_e = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip()
-            c_erg = (
-                textos_e.str.startswith('control de ruido') | 
-                textos_e.str.startswith('mejorar el orden') | 
-                textos_e.str.startswith('faja transportadora') | 
-                textos_e.str.startswith('más equipos de trabajo') | 
-                textos_e.str.startswith('mejor orden en estación')
-            ).sum()
+        c_erg = df_ent_fil['Ajustes ergonomicos'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Ajustes ergonomicos' in df_ent_fil.columns else 0
         st.metric("Ajustes Ergonómicos", f"{c_erg} Casos")
     with cb2:
-        c_rest = 0
-        if 'Restricciones Físicas' in df_ent_fil.columns:
-            c_rest = df_ent_fil['Restricciones Físicas'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum()
+        c_rest = df_ent_fil['Restricciones Físicas'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Restricciones Físicas' in df_ent_fil.columns else 0
         st.metric("Restricciones Físicas", f"{c_rest} Casos")
     with cb3:
         c_peso = df_ent_fil['Actividad más difícil'].astype(str).str.lower().str.contains('peso|cargar|almacén|fuerza').sum() if 'Actividad más difícil' in df_ent_fil.columns else 0
         st.metric("Dificultades Cargar Peso", f"{c_peso} Casos")
     with cb4:
-        c_acc = 0
-        if 'Mejora solicitada' in df_ent_fil.columns:
-            textos_m = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip()
-            c_acc = (
-                textos_m.str.startswith('intérprete') | 
-                textos_m.str.startswith('interprete') | 
-                (textos_m == 'que tenga un distintivo de sordo') |
-                textos_m.str.contains('macrotipo')
-            ).sum()
+        c_acc = df_ent_fil['Accesibilidad'].astype(str).str.lower().str.strip().isin(['sí', 'si']).sum() if 'Accesibilidad' in df_ent_fil.columns else 0
         st.metric("Especificos Accesibilidad", f"{c_acc} Casos")
 
 with tab2:
@@ -483,7 +451,7 @@ with tab3:
         else:
             st.metric("Total de Colaboradores", len(df_audit_ent))
             columnas_vista = ['ID', 'Nombre del colaborador', 'Edad', 'Sede de tienda', 'Puesto colaborador']
-            col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', 'Restricciones Físicas', col_bull_name, col_conf_name, 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
+            col_extra = [c for c in ['Resignación de cambio de puesto', 'Recomendación cambio de sede', 'Trabaja con tranquilidad', 'Estrés por carga laboral', 'Ambiente de trabajo', 'Requiere instrucciones adaptadas', 'Apoyo principal', 'Formato Preferido de apoyo', 'Retos en la relación con clientes', 'Restricciones Físicas', 'Ajustes ergonomicos', 'Accesibilidad', col_bull_name, col_conf_name, 'Riesgo de salida de la empresa', 'Mejora solicitada'] if c in df_audit_ent.columns]
             st.dataframe(df_audit_ent[columnas_vista + col_extra], use_container_width=True, hide_index=True)
             
     st.markdown("---")
