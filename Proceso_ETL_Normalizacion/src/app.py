@@ -56,6 +56,7 @@ opciones_alerta = [
     "Ajustes Ergonómicos",
     "Especificos de Accesibilidad (Mejora solicitada)",
     "Restricciones Físicas",
+    "Especificos Macrotipos",
     "Checklist: Compatibilidad Alta (Ajuste puesto persona)"
 ]
 
@@ -128,7 +129,7 @@ elif alerta_sel == "Apoyos Visuales (Formato Preferido = Visual)":
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('visual')]
 elif alerta_sel == "Apoyos Escritos (Formato Preferido = Escrita)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
-        df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('escrita')]
+        df_audit_ent = df_audit_ent[df_audit_ent['Format Preferido de apoyo'].astype(str).str.lower().str.contains('escrita')]
 elif alerta_sel == "Apoyos Verbales (Formato Preferido = Verbal)":
     if 'Formato Preferido de apoyo' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Formato Preferido de apoyo'].astype(str).str.lower().str.contains('verbal|oral|explicación')]
@@ -164,6 +165,9 @@ elif alerta_sel == "Ajustes Ergonómicos":
 elif alerta_sel == "Restricciones Físicas":
     if 'Restricciones Físicas' in df_audit_ent.columns:
         df_audit_ent = df_audit_ent[df_audit_ent['Restricciones Físicas'].astype(str).str.lower().str.strip().isin(['sí', 'si'])]
+elif alerta_sel == "Especificos Macrotipos":
+    if 'Mejora solicitada' in df_audit_ent.columns:
+        df_audit_ent = df_audit_ent[df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip().str.contains('macrotipo')]
 elif alerta_sel == "Checklist: Compatibilidad Alta (Ajuste puesto persona)":
     if 'Ajuste puesto persona' in df_audit_chk.columns:
         df_audit_chk = df_audit_chk[df_audit_chk['Ajuste puesto persona'].astype(str).str.lower().str.strip().str.contains('alto')]
@@ -348,7 +352,7 @@ with tab1:
 
     st.markdown("---")
     st.subheader("Adaptaciones del Puesto (Frecuencia de Requerimientos)")
-    cb1, cb2, cb3, cb4 = st.columns(4)
+    cb1, cb2, cb3, cb4, cb5 = st.columns(5)
     
     with cb1:
         c_erg = 0
@@ -376,6 +380,9 @@ with tab1:
             textos_m = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip()
             c_acc = (textos_m.str.startswith('intérprete') | textos_m.str.startswith('interprete') | (textos_m == 'que tenga un distintivo de sordo')).sum()
         st.metric("Especificos Accesibilidad", f"{c_acc} Casos")
+    with cb5:
+        c_macro = df_ent_fil['Mejora solicitada'].astype(str).str.lower().str.strip().str.contains('macrotipo').sum() if 'Mejora solicitada' in df_ent_fil.columns else 0
+        st.metric("Especificos Macrotipos", f"{c_macro} Casos")
 
 with tab2:
     st.header("Métricas de Desempeño y Capacidad Operativa (Checklist)")
