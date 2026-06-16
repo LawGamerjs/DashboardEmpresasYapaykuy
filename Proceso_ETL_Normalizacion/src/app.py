@@ -53,7 +53,7 @@ opciones_alerta = [
     "Conflictos Compañeros (Presencia conflictos)",
     "Riesgo de Salida Activo",
     "Resignación de Puesto Activa",
-    "Ajustes Ergonómicos (Control de Ruido)",
+    "Ajustes Ergonómicos",
     "Especificos de Accesibilidad (Mejora solicitada)",
     "Restricciones Físicas",
     "Checklist: Compatibilidad Alta (Ajuste puesto persona)"
@@ -151,7 +151,7 @@ elif alerta_sel == "Especificos de Accesibilidad (Mejora solicitada)":
     if 'Mejora solicitada' in df_audit_ent.columns:
         textos_m = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
         df_audit_ent = df_audit_ent[textos_m.str.startswith('intérprete') | textos_m.str.startswith('interprete') | (textos_m == 'que tenga un distintivo de sordo')]
-elif alerta_sel == "Ajustes Ergonómicos (Control de Ruido)":
+elif alerta_sel == "Ajustes Ergonómicos":
     if 'Mejora solicitada' in df_audit_ent.columns:
         textos_e = df_audit_ent['Mejora solicitada'].astype(str).str.lower().str.strip()
         df_audit_ent = df_audit_ent[
